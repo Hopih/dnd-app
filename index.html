@@ -3,1012 +3,817 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>D&D Character Generator</title>
+<title>D&D Hero Forge</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --gold: #c9a227;
-    --gold-light: #f0c040;
-    --gold-dark: #8b6914;
-    --parchment: #f5e6c8;
-    --parchment-dark: #e8d5a3;
-    --ink: #1a0f00;
-    --blood: #8b1a1a;
-    --shadow: #0a0500;
-    --bg: #0d0804;
-    --panel: #1a1008;
-    --border: #3d2a0a;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: 'Crimson Text', Georgia, serif;
-    background: var(--bg);
-    color: var(--parchment);
-    min-height: 100vh;
-    overflow-x: hidden;
-    position: relative;
-  }
-
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background:
-      radial-gradient(ellipse at 20% 20%, rgba(201,162,39,0.06) 0%, transparent 50%),
-      radial-gradient(ellipse at 80% 80%, rgba(139,26,26,0.08) 0%, transparent 50%),
-      url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c9a227' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .container {
-    position: relative;
-    z-index: 1;
-    max-width: 480px;
-    margin: 0 auto;
-    padding: 20px 16px 40px;
-  }
-
-  /* HEADER */
-  .header {
-    text-align: center;
-    margin-bottom: 28px;
-    position: relative;
-  }
-
-  .header-ornament {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    margin-bottom: 8px;
-  }
-
-  .ornament-line {
-    flex: 1;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--gold), transparent);
-  }
-
-  .ornament-diamond {
-    width: 8px; height: 8px;
-    background: var(--gold);
-    transform: rotate(45deg);
-    flex-shrink: 0;
-  }
-
-  .header h1 {
-    font-family: 'Cinzel Decorative', serif;
-    font-size: 20px;
-    font-weight: 900;
-    color: var(--gold-light);
-    text-shadow: 0 0 20px rgba(201,162,39,0.5), 0 2px 4px rgba(0,0,0,0.8);
-    letter-spacing: 2px;
-    line-height: 1.3;
-  }
-
-  .header-sub {
-    font-family: 'Crimson Text', serif;
-    font-style: italic;
-    color: rgba(245,230,200,0.5);
-    font-size: 13px;
-    margin-top: 4px;
-  }
-
-  /* TABS */
-  .tabs {
-    display: flex;
-    gap: 0;
-    background: var(--shadow);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    margin-bottom: 20px;
-    overflow: hidden;
-  }
-
-  .tab {
-    flex: 1;
-    padding: 10px 8px;
-    text-align: center;
-    cursor: pointer;
-    font-family: 'Cinzel Decorative', serif;
-    font-size: 10px;
-    color: rgba(245,230,200,0.4);
-    border: none;
-    background: none;
-    transition: all 0.3s;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    position: relative;
-  }
-
-  .tab.active {
-    background: rgba(201,162,39,0.12);
-    color: var(--gold-light);
-  }
-
-  .tab.active::after {
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 2px;
-    background: var(--gold);
-  }
-
-  /* PANEL */
-  .panel {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 20px;
-    margin-bottom: 16px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .panel::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--gold-dark), var(--gold), var(--gold-dark), transparent);
-  }
-
-  .panel-title {
-    font-family: 'Cinzel Decorative', serif;
-    font-size: 11px;
-    color: var(--gold);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-bottom: 14px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .panel-title::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: linear-gradient(90deg, var(--border), transparent);
-  }
-
-  /* FORM ELEMENTS */
-  .form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .form-group.full { grid-column: 1 / -1; }
-
-  label {
-    font-size: 11px;
-    color: rgba(245,230,200,0.5);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    font-family: 'Cinzel Decorative', serif;
-  }
-
-  input[type="text"], select {
-    background: rgba(0,0,0,0.4);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    color: var(--parchment);
-    font-family: 'Crimson Text', serif;
-    font-size: 15px;
-    padding: 8px 10px;
-    outline: none;
-    transition: border-color 0.2s;
-    -webkit-appearance: none;
-    width: 100%;
-  }
-
-  input[type="text"]:focus, select:focus {
-    border-color: var(--gold-dark);
-  }
-
-  select option { background: #1a1008; }
-
-  /* RANDOM BUTTON */
-  .btn-random {
-    width: 100%;
-    padding: 12px;
-    background: none;
-    border: 1px dashed var(--border);
-    border-radius: 4px;
-    color: rgba(245,230,200,0.4);
-    font-family: 'Cinzel Decorative', serif;
-    font-size: 10px;
-    letter-spacing: 2px;
-    cursor: pointer;
-    transition: all 0.3s;
-    margin-top: 4px;
-  }
-
-  .btn-random:hover {
-    border-color: var(--gold-dark);
-    color: var(--gold);
-  }
-
-  /* DICE ICON */
-  .dice-icon { font-size: 16px; }
-
-  /* GENERATE BUTTON */
-  .btn-generate {
-    width: 100%;
-    padding: 16px;
-    background: linear-gradient(135deg, #2a1a00, #4a2e00);
-    border: 1px solid var(--gold-dark);
-    border-radius: 4px;
-    color: var(--gold-light);
-    font-family: 'Cinzel Decorative', serif;
-    font-size: 13px;
-    letter-spacing: 3px;
-    cursor: pointer;
-    transition: all 0.3s;
-    text-transform: uppercase;
-    position: relative;
-    overflow: hidden;
-    margin-top: 8px;
-  }
-
-  .btn-generate::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, transparent 30%, rgba(201,162,39,0.15) 50%, transparent 70%);
-    transform: translateX(-100%);
-    transition: transform 0.6s;
-  }
-
-  .btn-generate:hover { border-color: var(--gold); }
-  .btn-generate:hover::before { transform: translateX(100%); }
-  .btn-generate:active { transform: scale(0.98); }
-
-  /* STATS */
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-  }
-
-  .stat-box {
-    background: rgba(0,0,0,0.4);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 10px 8px;
-    text-align: center;
-    position: relative;
-  }
-
-  .stat-name {
-    font-family: 'Cinzel Decorative', serif;
-    font-size: 8px;
-    color: rgba(245,230,200,0.4);
-    letter-spacing: 1px;
-    margin-bottom: 4px;
-  }
-
-  .stat-value {
-    font-family: 'Cinzel Decorative', serif;
-    font-size: 22px;
-    color: var(--gold-light);
-    font-weight: 700;
-    line-height: 1;
-  }
-
-  .stat-mod {
-    font-size: 12px;
-    color: rgba(245,230,200,0.5);
-    margin-top: 2px;
-  }
-
-  /* CHARACTER CARD */
-  .char-card {
-    background: linear-gradient(135deg, #1a1008 0%, #0d0804 100%);
-    border: 1px solid var(--gold-dark);
-    border-radius: 6px;
-    padding: 20px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .char-card::before {
-    content: '';
-    position: absolute;
-    top: -50%; left: -50%;
-    width: 200%; height: 200%;
-    background: radial-gradient(ellipse at center, rgba(201,162,39,0.04) 0%, transparent 60%);
-    pointer-events: none;
-  }
-
-  .char-avatar {
-    width: 80px; height: 80px;
-    margin: 0 auto 16px;
-    position: relative;
-  }
-
-  .char-avatar-frame {
-    width: 80px; height: 80px;
-    border: 2px solid var(--gold-dark);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0,0,0,0.6);
-    font-size: 36px;
-    position: relative;
-    z-index: 1;
-  }
-
-  .char-avatar::before, .char-avatar::after {
-    content: '✦';
-    position: absolute;
-    color: var(--gold-dark);
-    font-size: 10px;
-    top: 50%; transform: translateY(-50%);
-  }
-
-  .char-avatar::before { left: -14px; }
-  .char-avatar::after { right: -14px; }
-
-  .char-name {
-    font-family: 'Cinzel Decorative', serif;
-    font-size: 18px;
-    color: var(--gold-light);
-    text-align: center;
-    margin-bottom: 4px;
-    text-shadow: 0 0 20px rgba(201,162,39,0.3);
-  }
-
-  .char-subtitle {
-    text-align: center;
-    font-style: italic;
-    color: rgba(245,230,200,0.5);
-    font-size: 13px;
-    margin-bottom: 16px;
-  }
-
-  .char-divider {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 16px 0;
-  }
-
-  .char-divider span {
-    color: var(--gold-dark);
-    font-size: 10px;
-    flex-shrink: 0;
-  }
-
-  .char-divider::before, .char-divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
-
-  .trait-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 14px;
-  }
-
-  .trait-item {
-    background: rgba(0,0,0,0.3);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    padding: 8px 10px;
-  }
-
-  .trait-label {
-    font-family: 'Cinzel Decorative', serif;
-    font-size: 8px;
-    color: var(--gold-dark);
-    letter-spacing: 1px;
-    margin-bottom: 3px;
-  }
-
-  .trait-value {
-    font-size: 14px;
-    color: var(--parchment);
-  }
-
-  .backstory-box {
-    background: rgba(0,0,0,0.3);
-    border: 1px solid var(--border);
-    border-left: 2px solid var(--gold-dark);
-    border-radius: 3px;
-    padding: 12px;
-    font-style: italic;
-    font-size: 13px;
-    line-height: 1.6;
-    color: rgba(245,230,200,0.75);
-  }
-
-  .hp-bar-container {
-    margin-top: 14px;
-  }
-
-  .hp-bar-label {
-    display: flex;
-    justify-content: space-between;
-    font-family: 'Cinzel Decorative', serif;
-    font-size: 9px;
-    color: var(--gold-dark);
-    margin-bottom: 4px;
-    letter-spacing: 1px;
-  }
-
-  .hp-bar {
-    height: 6px;
-    background: rgba(0,0,0,0.5);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    overflow: hidden;
-  }
-
-  .hp-bar-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--blood), #c0392b);
-    border-radius: 2px;
-    transition: width 1s ease;
-  }
-
-  /* SKILLS LIST */
-  .skills-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 8px;
-  }
-
-  .skill-tag {
-    background: rgba(201,162,39,0.1);
-    border: 1px solid rgba(201,162,39,0.25);
-    border-radius: 20px;
-    padding: 3px 10px;
-    font-size: 12px;
-    color: rgba(245,230,200,0.7);
-  }
-
-  /* LOADING */
-  .loading-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(13,8,4,0.9);
-    z-index: 100;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .loading-overlay.visible { display: flex; }
-
-  .loading-dice {
-    font-size: 48px;
-    animation: spin 1s linear infinite;
-  }
-
-  @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
-
-  .loading-text {
-    font-family: 'Cinzel Decorative', serif;
-    color: var(--gold);
-    font-size: 12px;
-    letter-spacing: 3px;
-    animation: pulse 1.5s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 0.5; }
-    50% { opacity: 1; }
-  }
-
-  /* SECTION HIDDEN */
-  .section { display: none; }
-  .section.active { display: block; }
-
-  /* SAVE BUTTON */
-  .btn-save {
-    width: 100%;
-    padding: 12px;
-    background: rgba(201,162,39,0.1);
-    border: 1px solid var(--gold-dark);
-    border-radius: 4px;
-    color: var(--gold);
-    font-family: 'Cinzel Decorative', serif;
-    font-size: 10px;
-    letter-spacing: 2px;
-    cursor: pointer;
-    margin-top: 12px;
-    transition: all 0.3s;
-  }
-
-  .btn-save:hover { background: rgba(201,162,39,0.2); }
-
-  /* SAVED LIST */
-  .saved-char {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 12px 14px;
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    cursor: pointer;
-    transition: border-color 0.2s;
-  }
-
-  .saved-char:hover { border-color: var(--gold-dark); }
-
-  .saved-char-emoji { font-size: 24px; }
-
-  .saved-char-info { flex: 1; }
-
-  .saved-char-name {
-    font-family: 'Cinzel Decorative', serif;
-    font-size: 12px;
-    color: var(--gold-light);
-    margin-bottom: 2px;
-  }
-
-  .saved-char-sub { font-size: 12px; color: rgba(245,230,200,0.4); font-style: italic; }
-
-  .empty-state {
-    text-align: center;
-    padding: 40px 20px;
-    color: rgba(245,230,200,0.25);
-    font-style: italic;
-  }
-
-  .empty-state-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.3; }
-
-  /* RESULT appears with animation */
-  .result-panel {
-    animation: fadeInUp 0.5s ease;
-  }
-
-  @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: var(--shadow); }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+:root {
+  --gold: #c9a227; --gold-light: #f0c040; --gold-dark: #8b6914;
+  --parchment: #f5e6c8; --ink: #1a0f00; --blood: #8b1a1a;
+  --bg: #0d0804; --panel: #1a1008; --border: #3d2a0a;
+  --green: #2d6a2d; --green-light: #4CAF50;
+  --shadow: #0a0500;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: 'Crimson Text', Georgia, serif; background: var(--bg); color: var(--parchment); min-height: 100vh; overflow-x: hidden; }
+body::before {
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background: radial-gradient(ellipse at 20% 20%, rgba(201,162,39,0.06) 0%, transparent 50%),
+              radial-gradient(ellipse at 80% 80%, rgba(139,26,26,0.08) 0%, transparent 50%),
+              url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23c9a227' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");
+}
+.container { position: relative; z-index: 1; max-width: 480px; margin: 0 auto; padding: 16px 14px 60px; }
+
+/* NAV */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+  background: rgba(10,5,0,0.97); border-top: 1px solid var(--border);
+  display: flex; max-width: 480px; margin: 0 auto;
+}
+.nav-btn {
+  flex: 1; padding: 10px 4px 8px; border: none; background: none;
+  color: rgba(245,230,200,0.35); cursor: pointer; transition: all 0.2s;
+  font-family: 'Cinzel Decorative', serif; font-size: 8px; letter-spacing: 0.5px;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+}
+.nav-btn .nav-icon { font-size: 18px; }
+.nav-btn.active { color: var(--gold-light); }
+.nav-btn.active .nav-icon { filter: drop-shadow(0 0 6px rgba(240,192,64,0.6)); }
+
+/* HEADER */
+.header { text-align: center; margin-bottom: 20px; }
+.ornament { display: flex; align-items: center; gap: 10px; margin: 6px 0; }
+.ornament-line { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+.ornament-diamond { width: 7px; height: 7px; background: var(--gold); transform: rotate(45deg); flex-shrink: 0; }
+.header h1 { font-family: 'Cinzel Decorative', serif; font-size: 18px; font-weight: 900; color: var(--gold-light); text-shadow: 0 0 20px rgba(201,162,39,0.5); letter-spacing: 2px; line-height: 1.3; }
+.header-sub { font-style: italic; color: rgba(245,230,200,0.4); font-size: 12px; margin-top: 3px; }
+
+/* PANEL */
+.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 16px; margin-bottom: 14px; position: relative; overflow: hidden; }
+.panel::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--gold-dark), var(--gold), var(--gold-dark), transparent); }
+.panel-title { font-family: 'Cinzel Decorative', serif; font-size: 10px; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.panel-title::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--border), transparent); }
+
+/* FORM */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+label { font-size: 10px; color: rgba(245,230,200,0.45); letter-spacing: 1px; text-transform: uppercase; font-family: 'Cinzel Decorative', serif; }
+input[type="text"], select { background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 3px; color: var(--parchment); font-family: 'Crimson Text', serif; font-size: 14px; padding: 7px 9px; outline: none; -webkit-appearance: none; width: 100%; transition: border-color 0.2s; }
+input:focus, select:focus { border-color: var(--gold-dark); }
+select option { background: #1a1008; }
+
+/* BUTTONS */
+.btn-random { width: 100%; padding: 10px; background: none; border: 1px dashed var(--border); border-radius: 4px; color: rgba(245,230,200,0.35); font-family: 'Cinzel Decorative', serif; font-size: 9px; letter-spacing: 2px; cursor: pointer; transition: all 0.3s; margin-top: 4px; }
+.btn-random:hover { border-color: var(--gold-dark); color: var(--gold); }
+.btn-generate { width: 100%; padding: 15px; background: linear-gradient(135deg, #2a1a00, #4a2e00); border: 1px solid var(--gold-dark); border-radius: 4px; color: var(--gold-light); font-family: 'Cinzel Decorative', serif; font-size: 12px; letter-spacing: 3px; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden; margin-top: 6px; }
+.btn-generate::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, transparent 30%, rgba(201,162,39,0.15) 50%, transparent 70%); transform: translateX(-100%); transition: transform 0.6s; }
+.btn-generate:hover::before { transform: translateX(100%); }
+.btn-generate:active { transform: scale(0.98); }
+.btn-save { width: 100%; padding: 11px; background: rgba(201,162,39,0.1); border: 1px solid var(--gold-dark); border-radius: 4px; color: var(--gold); font-family: 'Cinzel Decorative', serif; font-size: 9px; letter-spacing: 2px; cursor: pointer; margin-top: 10px; transition: all 0.3s; }
+.btn-save:hover { background: rgba(201,162,39,0.2); }
+
+/* STATS */
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.stat-box { background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 4px; padding: 8px 6px; text-align: center; }
+.stat-name { font-family: 'Cinzel Decorative', serif; font-size: 7px; color: rgba(245,230,200,0.35); letter-spacing: 1px; margin-bottom: 3px; }
+.stat-value { font-family: 'Cinzel Decorative', serif; font-size: 20px; color: var(--gold-light); font-weight: 700; line-height: 1; }
+.stat-mod { font-size: 11px; color: rgba(245,230,200,0.45); margin-top: 1px; }
+
+/* CHARACTER CARD */
+.char-card { background: linear-gradient(135deg, #1a1008 0%, #0d0804 100%); border: 1px solid var(--gold-dark); border-radius: 6px; padding: 18px; position: relative; overflow: hidden; }
+.char-card::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(ellipse at center, rgba(201,162,39,0.04) 0%, transparent 60%); pointer-events: none; }
+.char-avatar { width: 72px; height: 72px; margin: 0 auto 14px; position: relative; }
+.char-avatar-frame { width: 72px; height: 72px; border: 2px solid var(--gold-dark); border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); font-size: 32px; position: relative; z-index: 1; }
+.char-avatar::before, .char-avatar::after { content: '✦'; position: absolute; color: var(--gold-dark); font-size: 9px; top: 50%; transform: translateY(-50%); }
+.char-avatar::before { left: -12px; }
+.char-avatar::after { right: -12px; }
+.char-name { font-family: 'Cinzel Decorative', serif; font-size: 16px; color: var(--gold-light); text-align: center; margin-bottom: 3px; text-shadow: 0 0 20px rgba(201,162,39,0.3); }
+.char-subtitle { text-align: center; font-style: italic; color: rgba(245,230,200,0.45); font-size: 12px; margin-bottom: 14px; }
+.char-divider { display: flex; align-items: center; gap: 8px; margin: 12px 0; }
+.char-divider span { color: var(--gold-dark); font-size: 10px; flex-shrink: 0; }
+.char-divider::before, .char-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.trait-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.trait-item { background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 3px; padding: 7px 9px; }
+.trait-label { font-family: 'Cinzel Decorative', serif; font-size: 7px; color: var(--gold-dark); letter-spacing: 1px; margin-bottom: 2px; }
+.trait-value { font-size: 13px; color: var(--parchment); }
+.backstory-box { background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-left: 2px solid var(--gold-dark); border-radius: 3px; padding: 10px; font-style: italic; font-size: 13px; line-height: 1.6; color: rgba(245,230,200,0.75); }
+.backstory-box.ai-loading { opacity: 0.5; animation: pulse 1.5s infinite; }
+.hp-bar-container { margin-top: 12px; }
+.hp-bar-label { display: flex; justify-content: space-between; font-family: 'Cinzel Decorative', serif; font-size: 8px; color: var(--gold-dark); margin-bottom: 3px; letter-spacing: 1px; }
+.hp-bar { height: 6px; background: rgba(0,0,0,0.5); border: 1px solid var(--border); border-radius: 3px; overflow: hidden; }
+.hp-bar-fill { height: 100%; background: linear-gradient(90deg, var(--blood), #c0392b); border-radius: 2px; transition: width 1s ease; }
+.skills-list { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+.skill-tag { background: rgba(201,162,39,0.1); border: 1px solid rgba(201,162,39,0.2); border-radius: 20px; padding: 2px 9px; font-size: 11px; color: rgba(245,230,200,0.65); }
+
+/* INVENTORY */
+.inventory-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.inv-item { background: rgba(0,0,0,0.35); border: 1px solid var(--border); border-radius: 4px; padding: 8px 10px; display: flex; align-items: center; gap: 8px; }
+.inv-item-icon { font-size: 20px; flex-shrink: 0; }
+.inv-item-info { flex: 1; min-width: 0; }
+.inv-item-name { font-size: 13px; color: var(--parchment); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.inv-item-type { font-size: 10px; color: rgba(245,230,200,0.35); font-style: italic; }
+.inv-item.rare { border-color: rgba(201,162,39,0.4); }
+.inv-item.rare .inv-item-name { color: var(--gold-light); }
+
+/* DICE SECTION */
+.dice-arena { text-align: center; padding: 10px 0; }
+.dice-display { font-size: 80px; margin: 10px 0; display: inline-block; transition: transform 0.1s; cursor: pointer; user-select: none; filter: drop-shadow(0 0 10px rgba(201,162,39,0.3)); }
+.dice-display.rolling { animation: diceRoll 0.8s ease-out; }
+@keyframes diceRoll {
+  0% { transform: rotate(0deg) scale(1); }
+  20% { transform: rotate(180deg) scale(1.3); }
+  40% { transform: rotate(360deg) scale(0.8); }
+  60% { transform: rotate(540deg) scale(1.2); }
+  80% { transform: rotate(700deg) scale(0.9); }
+  100% { transform: rotate(720deg) scale(1); }
+}
+.dice-result { font-family: 'Cinzel Decorative', serif; font-size: 48px; color: var(--gold-light); text-shadow: 0 0 30px rgba(201,162,39,0.6); min-height: 60px; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
+.dice-result.crit { color: #ff6b6b; text-shadow: 0 0 30px rgba(255,107,107,0.6); animation: critFlash 0.5s ease; }
+.dice-result.nat20 { color: #ffd700; text-shadow: 0 0 40px rgba(255,215,0,0.8); animation: nat20Flash 1s ease; }
+@keyframes critFlash { 0%,100%{opacity:1} 50%{opacity:0.3} }
+@keyframes nat20Flash { 0%{transform:scale(1)} 50%{transform:scale(1.3)} 100%{transform:scale(1)} }
+.dice-label { font-family: 'Cinzel Decorative', serif; font-size: 10px; color: rgba(245,230,200,0.4); letter-spacing: 2px; margin-bottom: 16px; }
+.dice-btns { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 14px; }
+.dice-btn { padding: 10px 6px; background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 4px; color: rgba(245,230,200,0.6); font-family: 'Cinzel Decorative', serif; font-size: 10px; cursor: pointer; transition: all 0.2s; }
+.dice-btn:hover, .dice-btn.active { border-color: var(--gold-dark); color: var(--gold-light); background: rgba(201,162,39,0.1); }
+.roll-history { margin-top: 14px; }
+.roll-entry { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid rgba(61,42,10,0.4); font-size: 13px; color: rgba(245,230,200,0.5); }
+.roll-entry .roll-val { font-family: 'Cinzel Decorative', serif; color: var(--gold); font-size: 14px; }
+.roll-entry .roll-val.crit { color: #ff6b6b; }
+.roll-entry .roll-val.nat { color: #ffd700; }
+
+/* COMBAT */
+.combat-arena { }
+.monster-card { background: linear-gradient(135deg, #1a0808, #0d0404); border: 1px solid #5a1a1a; border-radius: 6px; padding: 16px; text-align: center; margin-bottom: 14px; position: relative; overflow: hidden; }
+.monster-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, #8b1a1a, #c0392b, #8b1a1a, transparent); }
+.monster-emoji { font-size: 56px; margin-bottom: 8px; display: block; }
+.monster-name { font-family: 'Cinzel Decorative', serif; font-size: 14px; color: #e74c3c; margin-bottom: 4px; }
+.monster-hp-bar { height: 8px; background: rgba(0,0,0,0.5); border: 1px solid #5a1a1a; border-radius: 4px; overflow: hidden; margin-top: 8px; }
+.monster-hp-fill { height: 100%; background: linear-gradient(90deg, #8b1a1a, #e74c3c); transition: width 0.5s ease; border-radius: 3px; }
+.monster-hp-label { display: flex; justify-content: space-between; font-family: 'Cinzel Decorative', serif; font-size: 8px; color: rgba(231,76,60,0.6); margin-bottom: 3px; letter-spacing: 1px; }
+.combat-log { background: rgba(0,0,0,0.5); border: 1px solid var(--border); border-radius: 4px; padding: 10px; height: 110px; overflow-y: auto; margin-bottom: 12px; }
+.log-entry { font-size: 12px; padding: 2px 0; line-height: 1.5; }
+.log-entry.hero { color: var(--gold); }
+.log-entry.monster { color: #e74c3c; }
+.log-entry.system { color: rgba(245,230,200,0.4); font-style: italic; }
+.log-entry.crit-log { color: #ffd700; font-weight: bold; }
+.combat-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.combat-btn { padding: 12px; border-radius: 4px; font-family: 'Cinzel Decorative', serif; font-size: 10px; letter-spacing: 1px; cursor: pointer; transition: all 0.2s; border: 1px solid; }
+.combat-btn.attack { background: rgba(139,26,26,0.3); border-color: #8b1a1a; color: #e74c3c; }
+.combat-btn.attack:hover { background: rgba(139,26,26,0.5); }
+.combat-btn.special { background: rgba(201,162,39,0.15); border-color: var(--gold-dark); color: var(--gold); }
+.combat-btn.special:hover { background: rgba(201,162,39,0.25); }
+.combat-btn.flee { background: rgba(0,0,0,0.3); border-color: var(--border); color: rgba(245,230,200,0.4); grid-column: 1/-1; padding: 8px; font-size: 9px; }
+.combat-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.hero-combat-hp { display: flex; gap: 10px; margin-bottom: 12px; }
+.combat-hp-box { flex: 1; background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 4px; padding: 8px; text-align: center; }
+.combat-hp-label { font-family: 'Cinzel Decorative', serif; font-size: 8px; color: var(--gold-dark); letter-spacing: 1px; margin-bottom: 4px; }
+.combat-hp-val { font-family: 'Cinzel Decorative', serif; font-size: 18px; color: var(--gold-light); }
+.combat-hp-val.low { color: #e74c3c; }
+.monster-select-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.monster-select-btn { background: rgba(0,0,0,0.4); border: 1px solid #5a1a1a; border-radius: 4px; padding: 10px 6px; text-align: center; cursor: pointer; transition: all 0.2s; }
+.monster-select-btn:hover { border-color: #c0392b; background: rgba(139,26,26,0.2); }
+.monster-select-btn .ms-emoji { font-size: 24px; margin-bottom: 4px; }
+.monster-select-btn .ms-name { font-family: 'Cinzel Decorative', serif; font-size: 8px; color: rgba(231,76,60,0.7); letter-spacing: 0.5px; }
+
+/* SAVED */
+.saved-char { background: var(--panel); border: 1px solid var(--border); border-radius: 4px; padding: 11px 13px; margin-bottom: 9px; display: flex; align-items: center; gap: 11px; cursor: pointer; transition: border-color 0.2s; }
+.saved-char:hover { border-color: var(--gold-dark); }
+.saved-char-emoji { font-size: 22px; }
+.saved-char-info { flex: 1; }
+.saved-char-name { font-family: 'Cinzel Decorative', serif; font-size: 11px; color: var(--gold-light); margin-bottom: 2px; }
+.saved-char-sub { font-size: 11px; color: rgba(245,230,200,0.35); font-style: italic; }
+.empty-state { text-align: center; padding: 40px 20px; color: rgba(245,230,200,0.2); font-style: italic; }
+.empty-state-icon { font-size: 36px; margin-bottom: 10px; opacity: 0.25; }
+
+/* LOADING */
+.loading-overlay { display: none; position: fixed; inset: 0; background: rgba(13,8,4,0.92); z-index: 100; align-items: center; justify-content: center; flex-direction: column; gap: 14px; }
+.loading-overlay.visible { display: flex; }
+.loading-dice { font-size: 44px; animation: spin 0.8s linear infinite; }
+@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+.loading-text { font-family: 'Cinzel Decorative', serif; color: var(--gold); font-size: 11px; letter-spacing: 3px; animation: pulse 1.5s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+
+/* SECTION */
+.section { display: none; }
+.section.active { display: block; animation: fadeInUp 0.35s ease; }
+@keyframes fadeInUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+
+/* VICTORY/DEFEAT */
+.battle-result { text-align: center; padding: 20px; }
+.battle-result-icon { font-size: 56px; margin-bottom: 10px; }
+.battle-result-title { font-family: 'Cinzel Decorative', serif; font-size: 16px; margin-bottom: 8px; }
+.battle-result-title.victory { color: var(--gold-light); }
+.battle-result-title.defeat { color: #e74c3c; }
+.battle-result-text { font-style: italic; color: rgba(245,230,200,0.6); font-size: 13px; margin-bottom: 16px; }
+.xp-badge { display: inline-block; background: rgba(201,162,39,0.15); border: 1px solid var(--gold-dark); border-radius: 20px; padding: 4px 14px; font-family: 'Cinzel Decorative', serif; font-size: 11px; color: var(--gold); margin-bottom: 14px; }
+
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: var(--shadow); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 </style>
 </head>
 <body>
 
 <div class="loading-overlay" id="loading">
   <div class="loading-dice">🎲</div>
-  <div class="loading-text">СУДЬБА РЕШАЕТСЯ...</div>
+  <div class="loading-text" id="loading-text">СУДЬБА РЕШАЕТСЯ...</div>
 </div>
 
 <div class="container">
   <div class="header">
-    <div class="header-ornament">
-      <div class="ornament-line"></div>
-      <div class="ornament-diamond"></div>
-      <div class="ornament-line"></div>
-    </div>
-    <h1>СОЗДАТЕЛЬ<br>ГЕРОЕВ</h1>
+    <div class="ornament"><div class="ornament-line"></div><div class="ornament-diamond"></div><div class="ornament-line"></div></div>
+    <h1>HERO FORGE</h1>
     <div class="header-sub">Dungeons & Dragons · 5th Edition</div>
-    <div class="header-ornament" style="margin-top:8px">
-      <div class="ornament-line"></div>
-      <div class="ornament-diamond"></div>
-      <div class="ornament-line"></div>
-    </div>
+    <div class="ornament"><div class="ornament-line"></div><div class="ornament-diamond"></div><div class="ornament-line"></div></div>
   </div>
 
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('create')">⚔️ Создать</button>
-    <button class="tab" onclick="switchTab('result')" id="tab-result" style="display:none">📜 Персонаж</button>
-    <button class="tab" onclick="switchTab('saved')">🏆 Отряд</button>
-  </div>
-
-  <!-- CREATE SECTION -->
+  <!-- CREATE -->
   <div class="section active" id="sec-create">
     <div class="panel">
       <div class="panel-title">Имя героя</div>
-      <div class="form-group">
-        <input type="text" id="char-name-input" placeholder="Введи имя или оставь пустым...">
-      </div>
-      <button class="btn-random" onclick="randomName()">🎲 Случайное имя</button>
+      <input type="text" id="char-name-input" placeholder="Введи имя или оставь пустым...">
+      <button class="btn-random" onclick="randomName()" style="margin-top:8px">🎲 Случайное имя</button>
     </div>
-
     <div class="panel">
       <div class="panel-title">Происхождение</div>
       <div class="form-grid">
-        <div class="form-group">
-          <label>Раса</label>
+        <div class="form-group"><label>Раса</label>
           <select id="race-select">
             <option value="">🎲 Случайно</option>
-            <option value="Человек">Человек</option>
-            <option value="Эльф">Эльф</option>
-            <option value="Дварф">Дварф</option>
-            <option value="Полурослик">Полурослик</option>
-            <option value="Гном">Гном</option>
-            <option value="Полуэльф">Полуэльф</option>
-            <option value="Полуорк">Полуорк</option>
-            <option value="Тифлинг">Тифлинг</option>
-            <option value="Дракорождённый">Дракорождённый</option>
+            <option>Человек</option><option>Эльф</option><option>Дварф</option>
+            <option>Полурослик</option><option>Гном</option><option>Полуэльф</option>
+            <option>Полуорк</option><option>Тифлинг</option><option>Дракорождённый</option>
           </select>
         </div>
-        <div class="form-group">
-          <label>Класс</label>
+        <div class="form-group"><label>Класс</label>
           <select id="class-select">
             <option value="">🎲 Случайно</option>
-            <option value="Варвар">Варвар</option>
-            <option value="Бард">Бард</option>
-            <option value="Жрец">Жрец</option>
-            <option value="Друид">Друид</option>
-            <option value="Воин">Воин</option>
-            <option value="Монах">Монах</option>
-            <option value="Паладин">Паладин</option>
-            <option value="Следопыт">Следопыт</option>
-            <option value="Плут">Плут</option>
-            <option value="Колдун">Колдун</option>
-            <option value="Волшебник">Волшебник</option>
+            <option>Варвар</option><option>Бард</option><option>Жрец</option>
+            <option>Друид</option><option>Воин</option><option>Монах</option>
+            <option>Паладин</option><option>Следопыт</option><option>Плут</option>
+            <option>Колдун</option><option>Волшебник</option>
           </select>
         </div>
-        <div class="form-group">
-          <label>Мировоззрение</label>
+        <div class="form-group"><label>Мировоззрение</label>
           <select id="align-select">
             <option value="">🎲 Случайно</option>
-            <option value="Законопослушный добрый">Законопослушный добрый</option>
-            <option value="Нейтральный добрый">Нейтральный добрый</option>
-            <option value="Хаотичный добрый">Хаотичный добрый</option>
-            <option value="Законопослушный нейтральный">Законопослушный нейт.</option>
-            <option value="Истинно нейтральный">Истинно нейтральный</option>
-            <option value="Хаотичный нейтральный">Хаотичный нейтральный</option>
-            <option value="Законопослушный злой">Законопослушный злой</option>
-            <option value="Нейтральный злой">Нейтральный злой</option>
-            <option value="Хаотичный злой">Хаотичный злой</option>
+            <option>Законопослушный добрый</option><option>Нейтральный добрый</option>
+            <option>Хаотичный добрый</option><option>Истинно нейтральный</option>
+            <option>Хаотичный нейтральный</option><option>Законопослушный злой</option>
+            <option>Нейтральный злой</option><option>Хаотичный злой</option>
           </select>
         </div>
-        <div class="form-group">
-          <label>Предыстория</label>
+        <div class="form-group"><label>Предыстория</label>
           <select id="bg-select">
             <option value="">🎲 Случайно</option>
-            <option value="Аколит">Аколит</option>
-            <option value="Преступник">Преступник</option>
-            <option value="Народный герой">Народный герой</option>
-            <option value="Благородный">Благородный</option>
-            <option value="Мудрец">Мудрец</option>
-            <option value="Солдат">Солдат</option>
-            <option value="Моряк">Моряк</option>
-            <option value="Отшельник">Отшельник</option>
+            <option>Аколит</option><option>Преступник</option><option>Народный герой</option>
+            <option>Благородный</option><option>Мудрец</option><option>Солдат</option>
+            <option>Моряк</option><option>Отшельник</option>
           </select>
         </div>
       </div>
     </div>
-
-    <button class="btn-generate" onclick="generateCharacter()">
-      ⚔️ &nbsp; ПРИЗВАТЬ ГЕРОЯ &nbsp; ⚔️
-    </button>
+    <button class="btn-generate" onclick="generateCharacter()">⚔️ &nbsp; ПРИЗВАТЬ ГЕРОЯ &nbsp; ⚔️</button>
   </div>
 
-  <!-- RESULT SECTION -->
-  <div class="section" id="sec-result">
+  <!-- CHARACTER -->
+  <div class="section" id="sec-char">
     <div id="character-output"></div>
   </div>
 
-  <!-- SAVED SECTION -->
+  <!-- DICE -->
+  <div class="section" id="sec-dice">
+    <div class="panel">
+      <div class="panel-title">Бросок кубика</div>
+      <div class="dice-arena">
+        <div class="dice-label" id="dice-type-label">БРОСОК d20</div>
+        <div class="dice-display" id="dice-emoji" onclick="rollDice()">🎲</div>
+        <div class="dice-result" id="dice-result">?</div>
+        <div class="dice-btns">
+          <button class="dice-btn active" onclick="selectDice(4, this)">d4</button>
+          <button class="dice-btn" onclick="selectDice(6, this)">d6</button>
+          <button class="dice-btn" onclick="selectDice(8, this)">d8</button>
+          <button class="dice-btn" onclick="selectDice(10, this)">d10</button>
+          <button class="dice-btn" onclick="selectDice(12, this)">d12</button>
+          <button class="dice-btn active" onclick="selectDice(20, this)">d20</button>
+          <button class="dice-btn" onclick="selectDice(100, this)">d100</button>
+          <button class="dice-btn" style="font-size:8px" onclick="rollAdvantage()">Преим.</button>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">История бросков</div>
+      <div class="roll-history" id="roll-history">
+        <div style="text-align:center;color:rgba(245,230,200,0.2);font-style:italic;font-size:13px;padding:10px">Бросков ещё не было...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMBAT -->
+  <div class="section" id="sec-combat">
+    <div id="combat-content">
+      <div class="panel">
+        <div class="panel-title">Выбери противника</div>
+        <div class="monster-select-grid" id="monster-select"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SAVED -->
   <div class="section" id="sec-saved">
     <div id="saved-list"></div>
   </div>
 </div>
 
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <button class="nav-btn active" onclick="switchTab('create', this)"><span class="nav-icon">⚔️</span>Создать</button>
+  <button class="nav-btn" onclick="switchTab('char', this)" id="nav-char" style="display:none"><span class="nav-icon">📜</span>Герой</button>
+  <button class="nav-btn" onclick="switchTab('dice', this)"><span class="nav-icon">🎲</span>Кубики</button>
+  <button class="nav-btn" onclick="switchTab('combat', this)"><span class="nav-icon">⚔️</span>Бой</button>
+  <button class="nav-btn" onclick="switchTab('saved', this)"><span class="nav-icon">🏆</span>Отряд</button>
+</div>
+
 <script>
-  // Init Telegram WebApp
-  const tg = window.Telegram?.WebApp;
-  if (tg) {
-    tg.ready();
-    tg.expand();
+const tg = window.Telegram?.WebApp;
+if (tg) { tg.ready(); tg.expand(); }
+
+// ── DATA ──────────────────────────────────────────────
+const RACES = ['Человек','Эльф','Дварф','Полурослик','Гном','Полуэльф','Полуорк','Тифлинг','Дракорождённый'];
+const CLASSES = ['Варвар','Бард','Жрец','Друид','Воин','Монах','Паладин','Следопыт','Плут','Колдун','Волшебник'];
+const ALIGNMENTS = ['Законопослушный добрый','Нейтральный добрый','Хаотичный добрый','Истинно нейтральный','Хаотичный нейтральный','Законопослушный злой','Нейтральный злой','Хаотичный злой'];
+const BACKGROUNDS = ['Аколит','Преступник','Народный герой','Благородный','Мудрец','Солдат','Моряк','Отшельник'];
+const NAMES_M = ['Аланор','Брандир','Каэль','Дорин','Элдан','Фаррин','Горум','Ирvel','Джорен','Кэйн','Морвен','Нассир','Орим','Рорик','Стерн','Тарос','Умбер','Вэйн','Волкар','Ярик'];
+const NAMES_F = ['Аэра','Белара','Сирра','Дайна','Элара','Фенна','Гвен','Хэйра','Иссол','Яира','Кэйра','Лира','Мира','Нова','Рэйна','Соларис','Тала','Урса','Вэйла','Зора'];
+const SURNAMES = ['Дубовый','Железный','Тёмный','Серебряный','Золотой','Огненный','Ледяной','Буревой','Теневой','Кровавый','Звёздный','Лунный'];
+const CLASS_EMOJI = {'Варвар':'⚔️','Бард':'🎸','Жрец':'✝️','Друид':'🌿','Воин':'🛡️','Монах':'👊','Паладин':'⚡','Следопыт':'🏹','Плут':'🗡️','Колдун':'💀','Волшебник':'🔮'};
+const CLASS_HP = {'Варвар':12,'Жрец':8,'Друид':8,'Воин':10,'Монах':8,'Паладин':10,'Следопыт':10,'Плут':8,'Колдун':8,'Волшебник':6,'Бард':8};
+const CLASS_SKILLS = {
+  'Варвар':['Атлетика','Выживание','Запугивание','Восприятие'],
+  'Бард':['Выступление','Убеждение','Обман','История'],
+  'Жрец':['История','Медицина','Убеждение','Религия'],
+  'Друид':['Природа','Восприятие','Выживание','Медицина'],
+  'Воин':['Атлетика','Запугивание','Восприятие','Акробатика'],
+  'Монах':['Акробатика','Атлетика','Скрытность','Религия'],
+  'Паладин':['Атлетика','Убеждение','Медицина','Религия'],
+  'Следопыт':['Выживание','Восприятие','Природа','Скрытность'],
+  'Плут':['Акробатика','Обман','Скрытность','Восприятие'],
+  'Колдун':['Обман','История','Запугивание','Магия'],
+  'Волшебник':['История','Магия','Расследование','Природа']
+};
+
+const INVENTORY = {
+  'Варвар':[{e:'⚔️',n:'Двуручный топор',t:'Оружие',r:true},{e:'🛡️',n:'Щит дикаря',t:'Доспех'},{e:'🍖',n:'Вяленое мясо',t:'Расходник'},{e:'💪',n:'Амулет ярости',t:'Аксессуар',r:true}],
+  'Бард':[{e:'🎸',n:'Лютня теней',t:'Инструмент',r:true},{e:'🗡️',n:'Рапира песни',t:'Оружие'},{e:'🃏',n:'Карты судьбы',t:'Фокус'},{e:'📖',n:'Книга баллад',t:'Книга'}],
+  'Жрец':[{e:'✝️',n:'Святой символ',t:'Фокус',r:true},{e:'🔨',n:'Боевой молот',t:'Оружие'},{e:'🧴',n:'Зелье лечения',t:'Расходник'},{e:'📿',n:'Чётки богов',t:'Аксессуар'}],
+  'Друид':[{e:'🌿',n:'Посох дубравы',t:'Оружие',r:true},{e:'🍀',n:'Омела',t:'Фокус'},{e:'🐾',n:'Тотем зверя',t:'Аксессуар',r:true},{e:'🧪',n:'Настойка трав',t:'Расходник'}],
+  'Воин':[{e:'🗡️',n:'Длинный меч',t:'Оружие',r:true},{e:'🛡️',n:'Кольчуга',t:'Доспех',r:true},{e:'🏹',n:'Арбалет',t:'Оружие'},{e:'💎',n:'Боевой перстень',t:'Аксессуар'}],
+  'Монах':[{e:'👊',n:'Кулаки бури',t:'Оружие',r:true},{e:'🥋',n:'Одеяние монаха',t:'Доспех'},{e:'📿',n:'Чётки ки',t:'Фокус',r:true},{e:'🌀',n:'Повязка дисциплины',t:'Аксессуар'}],
+  'Паладин':[{e:'⚡',n:'Священный меч',t:'Оружие',r:true},{e:'🛡️',n:'Латные доспехи',t:'Доспех',r:true},{e:'✝️',n:'Реликвия',t:'Фокус'},{e:'🧴',n:'Зелье лечения',t:'Расходник'}],
+  'Следопыт':[{e:'🏹',n:'Длинный лук',t:'Оружие',r:true},{e:'🗡️',n:'Охотничий нож',t:'Оружие'},{e:'🪤',n:'Силки',t:'Расходник'},{e:'🧭',n:'Компас предков',t:'Аксессуар',r:true}],
+  'Плут':[{e:'🗡️',n:'Кинжал теней',t:'Оружие',r:true},{e:'🪝',n:'Воровские инструменты',t:'Инструмент'},{e:'🎭',n:'Маска обмана',t:'Аксессуар',r:true},{e:'💰',n:'Кошелёк добычи',t:'Расходник'}],
+  'Колдун':[{e:'💀',n:'Посох пакта',t:'Оружие',r:true},{e:'📖',n:'Гримуар',t:'Книга',r:true},{e:'💜',n:'Камень патрона',t:'Фокус'},{e:'🦇',n:'Амулет тьмы',t:'Аксессуар'}],
+  'Волшебник':[{e:'🔮',n:'Магический жезл',t:'Фокус',r:true},{e:'📚',n:'Книга заклинаний',t:'Книга',r:true},{e:'🧪',n:'Компоненты',t:'Расходник'},{e:'🌟',n:'Звёздный кристалл',t:'Аксессуар'}],
+};
+
+const MONSTERS = [
+  {e:'🐉',n:'Дракон',hp:80,atk:[8,20],def:15,xp:500,desc:'Древний красный дракон'},
+  {e:'💀',n:'Лич',hp:60,atk:[6,18],def:13,xp:400,desc:'Нежить-чародей'},
+  {e:'👹',n:'Огр',hp:50,atk:[5,14],def:11,xp:200,desc:'Тупой но сильный'},
+  {e:'🕷️',n:'Паук',hp:30,atk:[3,10],def:9,xp:100,desc:'Гигантский паук'},
+  {e:'🧟',n:'Зомби',hp:22,atk:[2,8],def:7,xp:50,desc:'Восставший мертвец'},
+  {e:'🐺',n:'Волк',hp:18,atk:[2,6],def:8,xp:30,desc:'Ужасный варг'},
+];
+
+// ── STATE ─────────────────────────────────────────────
+let currentChar = null;
+let currentDice = 20;
+let rollHistory = [];
+let combatState = null;
+
+// ── UTILS ─────────────────────────────────────────────
+const rand = arr => arr[Math.floor(Math.random() * arr.length)];
+const randInt = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
+const roll = n => randInt(1,n);
+const modifier = s => { const m=Math.floor((s-10)/2); return m>=0?`+${m}`:`${m}`; };
+function roll4d6() { const r=[roll(6),roll(6),roll(6),roll(6)]; return r.reduce((a,b)=>a+b,0)-Math.min(...r); }
+
+// ── NAV ───────────────────────────────────────────────
+function switchTab(tab, btn) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sec-'+tab).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (tab==='saved') renderSaved();
+  if (tab==='combat' && !combatState) renderMonsterSelect();
+}
+
+// ── NAME ──────────────────────────────────────────────
+function randomName() {
+  const n = Math.random()>.5?NAMES_M:NAMES_F;
+  document.getElementById('char-name-input').value = `${rand(n)} ${rand(SURNAMES)}`;
+}
+
+// ── GENERATE CHARACTER ────────────────────────────────
+async function generateCharacter() {
+  const loading = document.getElementById('loading');
+  document.getElementById('loading-text').textContent = 'СУДЬБА РЕШАЕТСЯ...';
+  loading.classList.add('visible');
+
+  await new Promise(r=>setTimeout(r,600));
+
+  const name = document.getElementById('char-name-input').value.trim() ||
+               `${rand(Math.random()>.5?NAMES_M:NAMES_F)} ${rand(SURNAMES)}`;
+  const race = document.getElementById('race-select').value || rand(RACES);
+  const cls = document.getElementById('class-select').value || rand(CLASSES);
+  const alignment = document.getElementById('align-select').value || rand(ALIGNMENTS);
+  const background = document.getElementById('bg-select').value || rand(BACKGROUNDS);
+  const stats = {STR:roll4d6(),DEX:roll4d6(),CON:roll4d6(),INT:roll4d6(),WIS:roll4d6(),CHA:roll4d6()};
+  const con_mod = Math.floor((stats.CON-10)/2);
+  const maxHp = (CLASS_HP[cls]||8)+con_mod;
+  const level = randInt(1,5);
+  const inv = INVENTORY[cls]||INVENTORY['Воин'];
+
+  currentChar = {name,race,cls,alignment,background,stats,maxHp,currentHp:maxHp,skills:CLASS_SKILLS[cls]||[],level,emoji:CLASS_EMOJI[cls]||'⚔️',inv,backstory:'...',xp:0};
+
+  loading.classList.remove('visible');
+  renderCharacter(currentChar);
+
+  document.getElementById('nav-char').style.display='flex';
+  switchTab('char', document.getElementById('nav-char'));
+
+  // Generate AI backstory
+  generateAIBackstory(currentChar);
+}
+
+// ── AI BACKSTORY ──────────────────────────────────────
+async function generateAIBackstory(char) {
+  const el = document.getElementById('ai-backstory');
+  if (!el) return;
+  el.classList.add('ai-loading');
+  el.textContent = '✨ ИИ пишет историю...';
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:250,
+        messages:[{role:'user',content:`Напиши короткую предысторию (3-4 предложения) для персонажа D&D:
+Имя: ${char.name}
+Раса: ${char.race}
+Класс: ${char.cls}
+Мировоззрение: ${char.alignment}
+Предыстория: ${char.background}
+Уровень: ${char.level}
+
+Пиши от третьего лица, в атмосфере тёмного фэнтези. Только текст предыстории, без заголовков.`}]
+      })
+    });
+    const data = await resp.json();
+    const text = data.content?.[0]?.text || 'История теряется в туманах времени...';
+    el.classList.remove('ai-loading');
+    el.textContent = text;
+    if (currentChar) currentChar.backstory = text;
+  } catch(e) {
+    el.classList.remove('ai-loading');
+    el.textContent = 'История теряется в туманах времени...';
   }
+}
 
-  // Data
-  const RACES = ['Человек','Эльф','Дварф','Полурослик','Гном','Полуэльф','Полуорк','Тифлинг','Дракорождённый'];
-  const CLASSES = ['Варвар','Бард','Жрец','Друид','Воин','Монах','Паладин','Следопыт','Плут','Колдун','Волшебник'];
-  const ALIGNMENTS = ['Законопослушный добрый','Нейтральный добрый','Хаотичный добрый','Законопослушный нейтральный','Истинно нейтральный','Хаотичный нейтральный','Законопослушный злой','Нейтральный злой','Хаотичный злой'];
-  const BACKGROUNDS = ['Аколит','Преступник','Народный герой','Благородный','Мудрец','Солдат','Моряк','Отшельник'];
+// ── RENDER CHARACTER ──────────────────────────────────
+function renderCharacter(c, saved=false) {
+  const inv = c.inv||INVENTORY[c.cls]||[];
+  const html = `
+  <div class="char-card">
+    <div class="char-avatar"><div class="char-avatar-frame">${c.emoji}</div></div>
+    <div class="char-name">${c.name}</div>
+    <div class="char-subtitle">${c.race} · ${c.cls} · ${c.level} уровень</div>
+    <div class="char-divider"><span>✦</span></div>
+    <div class="trait-grid">
+      <div class="trait-item"><div class="trait-label">Мировоззрение</div><div class="trait-value">${c.alignment}</div></div>
+      <div class="trait-item"><div class="trait-label">Предыстория</div><div class="trait-value">${c.background}</div></div>
+    </div>
+    <div class="char-divider"><span>⚔</span></div>
+    <div class="stats-grid">
+      ${Object.entries(c.stats).map(([n,v])=>`<div class="stat-box"><div class="stat-name">${n}</div><div class="stat-value">${v}</div><div class="stat-mod">${modifier(v)}</div></div>`).join('')}
+    </div>
+    <div class="hp-bar-container">
+      <div class="hp-bar-label"><span>ХИТЫ</span><span>${c.maxHp} макс.</span></div>
+      <div class="hp-bar"><div class="hp-bar-fill" style="width:100%"></div></div>
+    </div>
+    <div class="char-divider"><span>✦</span></div>
+    <div class="panel-title">Навыки</div>
+    <div class="skills-list">${c.skills.map(s=>`<span class="skill-tag">${s}</span>`).join('')}</div>
+    <div class="char-divider"><span>✦</span></div>
+    <div class="panel-title">Инвентарь</div>
+    <div class="inventory-grid">
+      ${inv.map(i=>`<div class="inv-item${i.r?' rare':''}"><div class="inv-item-icon">${i.e}</div><div class="inv-item-info"><div class="inv-item-name">${i.n}</div><div class="inv-item-type">${i.t}${i.r?' · Редкий':''}</div></div></div>`).join('')}
+    </div>
+    <div class="char-divider"><span>✦</span></div>
+    <div class="panel-title">✨ Предыстория (ИИ)</div>
+    <div class="backstory-box ${saved?'':''}" id="ai-backstory">${c.backstory||'...'}</div>
+  </div>
+  ${!saved?`<button class="btn-save" onclick="saveCharacter()">📜 Сохранить в отряд</button>`:''}
+  `;
+  document.getElementById('character-output').innerHTML = html;
+}
 
-  const NAMES_M = ['Аланор','Брандир','Каэль','Дорин','Элдан','Фаррин','Горум','Хаэст','Ирvel','Джорен','Кэйн','Ладас','Морвен','Нассир','Орим','Парис','Куэнтин','Рорик','Стерн','Тарос','Умбер','Вэйн','Волкар','Ксен','Ярик'];
-  const NAMES_F = ['Аэра','Белара','Сирра','Дайна','Элара','Фенна','Гвен','Хэйра','Иссол','Яира','Кэйра','Лира','Мира','Нова','Ора','Пэйра','Квина','Рэйна','Соларис','Тала','Урса','Вэйла','Вэйра','Ксора','Зора'];
-  const SURNAMES = ['Дубовый','Железный','Тёмный','Серебряный','Золотой','Огненный','Ледяной','Буревой','Теневой','Кровавый','Звёздный','Лунный'];
+function saveCharacter() {
+  if (!currentChar) return;
+  const saved = JSON.parse(localStorage.getItem('dnd_chars')||'[]');
+  currentChar.savedAt = Date.now();
+  saved.unshift(currentChar);
+  if (saved.length>10) saved.pop();
+  localStorage.setItem('dnd_chars', JSON.stringify(saved));
+  const btn = document.querySelector('.btn-save');
+  if (btn) { btn.textContent='✅ Сохранено!'; btn.style.color='#4CAF50'; setTimeout(()=>{btn.textContent='📜 Сохранить в отряд';btn.style.color='';},2000); }
+  if (tg) tg.HapticFeedback?.notificationOccurred('success');
+}
 
-  const CLASS_EMOJI = {
-    'Варвар':'⚔️','Бард':'🎸','Жрец':'✝️','Друид':'🌿','Воин':'🛡️',
-    'Монах':'👊','Паладин':'⚡','Следопыт':'🏹','Плут':'🗡️','Колдун':'💀','Волшебник':'🔮'
+// ── DICE ──────────────────────────────────────────────
+const DICE_EMOJIS = {4:'🎲',6:'🎲',8:'🎲',10:'🎲',12:'🎲',20:'🎲',100:'🎲'};
+
+function selectDice(n, btn) {
+  currentDice = n;
+  document.querySelectorAll('.dice-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('dice-type-label').textContent = `БРОСОК d${n}`;
+  document.getElementById('dice-result').textContent = '?';
+  document.getElementById('dice-result').className = 'dice-result';
+}
+
+function rollDice() {
+  const diceEl = document.getElementById('dice-emoji');
+  const resEl = document.getElementById('dice-result');
+  diceEl.classList.remove('rolling');
+  void diceEl.offsetWidth;
+  diceEl.classList.add('rolling');
+  if (tg) tg.HapticFeedback?.impactOccurred('medium');
+
+  const result = roll(currentDice);
+  setTimeout(()=>{
+    resEl.textContent = result;
+    resEl.className = 'dice-result';
+    let label = `d${currentDice}`;
+    if (currentDice===20 && result===20) { resEl.classList.add('nat20'); resEl.textContent='20 ✨'; label='НАТ 20!'; if(tg) tg.HapticFeedback?.notificationOccurred('success'); }
+    else if (currentDice===20 && result===1) { resEl.classList.add('crit'); label='КРИТ ПРОВАЛ!'; if(tg) tg.HapticFeedback?.notificationOccurred('error'); }
+    addRollHistory(result, currentDice);
+  }, 820);
+}
+
+function rollAdvantage() {
+  const a = roll(20), b = roll(20), result = Math.max(a,b);
+  const resEl = document.getElementById('dice-result');
+  const diceEl = document.getElementById('dice-emoji');
+  diceEl.classList.remove('rolling'); void diceEl.offsetWidth; diceEl.classList.add('rolling');
+  if (tg) tg.HapticFeedback?.impactOccurred('heavy');
+  setTimeout(()=>{
+    resEl.className='dice-result';
+    resEl.textContent = `${result}`;
+    document.getElementById('dice-type-label').textContent = `ПРЕИМУЩЕСТВО (${a} / ${b})`;
+    if (result===20) { resEl.classList.add('nat20'); if(tg) tg.HapticFeedback?.notificationOccurred('success'); }
+    addRollHistory(result, 20, true);
+  },820);
+}
+
+function addRollHistory(val, dice, adv=false) {
+  rollHistory.unshift({val,dice,adv,time:new Date().toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'})});
+  if (rollHistory.length>8) rollHistory.pop();
+  const el = document.getElementById('roll-history');
+  el.innerHTML = rollHistory.map(r=>{
+    let cls=''; let suffix='';
+    if(r.dice===20&&r.val===20){cls='nat';suffix=' ✨';}
+    else if(r.dice===20&&r.val===1){cls='crit';}
+    return `<div class="roll-entry"><span>${r.adv?'Преимущество':('d'+r.dice)} · ${r.time}</span><span class="roll-val ${cls}">${r.val}${suffix}</span></div>`;
+  }).join('');
+}
+
+// ── COMBAT ────────────────────────────────────────────
+function renderMonsterSelect() {
+  const el = document.getElementById('monster-select');
+  if (!el) return;
+  el.innerHTML = MONSTERS.map((m,i)=>`
+    <div class="monster-select-btn" onclick="startCombat(${i})">
+      <div class="ms-emoji">${m.e}</div>
+      <div class="ms-name">${m.n}</div>
+      <div style="font-size:9px;color:rgba(231,76,60,0.4);margin-top:2px">HP: ${m.hp}</div>
+    </div>`).join('');
+}
+
+function startCombat(idx) {
+  if (!currentChar) {
+    document.getElementById('combat-content').innerHTML = `
+      <div class="panel"><div style="text-align:center;padding:20px;font-style:italic;color:rgba(245,230,200,0.4)">
+        Сначала создай персонажа!<br><br>
+        <button class="btn-generate" onclick="switchTab('create', document.querySelector('.nav-btn'))" style="font-size:10px;padding:10px">⚔️ Создать героя</button>
+      </div></div>`;
+    return;
+  }
+  const m = MONSTERS[idx];
+  combatState = {
+    monster:{...m,currentHp:m.hp},
+    heroHp: currentChar.maxHp,
+    heroMaxHp: currentChar.maxHp,
+    log:[],
+    turn:0,
+    over:false
   };
+  renderCombat();
+}
 
-  const RACE_EMOJI = {
-    'Человек':'👤','Эльф':'🧝','Дварф':'⛏️','Полурослик':'🦶','Гном':'🔧',
-    'Полуэльф':'🌗','Полуорк':'🪨','Тифлинг':'😈','Дракорождённый':'🐉'
-  };
+function renderCombat() {
+  const s = combatState;
+  const m = s.monster;
+  const mPct = Math.max(0,Math.round(m.currentHp/m.hp*100));
+  const hPct = Math.max(0,Math.round(s.heroHp/s.heroMaxHp*100));
+  const doc = document.getElementById('combat-content');
 
-  const CLASS_HP = {
-    'Варвар':12,'Жрец':8,'Друид':8,'Воин':10,'Монах':8,
-    'Паладин':10,'Следопыт':10,'Плут':8,'Колдун':8,'Волшебник':6,'Бард':8
-  };
-
-  const CLASS_SKILLS = {
-    'Варвар':['Атлетика','Выживание','Животновод.','Восприятие'],
-    'Бард':['Выступление','Убеждение','Обман','История'],
-    'Жрец':['История','Медицина','Убеждение','Религия'],
-    'Друид':['Природа','Восприятие','Выживание','Медицина'],
-    'Воин':['Атлетика','Запугивание','Восприятие','История'],
-    'Монах':['Акробатика','Атлетика','Скрытность','Религия'],
-    'Паладин':['Атлетика','Убеждение','Медицина','Религия'],
-    'Следопыт':['Выживание','Восприятие','Природа','Скрытность'],
-    'Плут':['Акробатика','Обман','Скрытность','Восприятие'],
-    'Колдун':['Обман','История','Запугивание','Магия'],
-    'Волшебник':['История','Магия','Расследование','Природа']
-  };
-
-  const TRAITS = [
-    'Прямолинеен до грубости','Хранит мрачные тайны','Смеётся в лицо смерти',
-    'Никогда не нарушает клятв','Коллекционирует чужие секреты','Говорит загадками',
-    'Не доверяет магии','Верит в знамения','Видит красоту в разрушении',
-    'Защищает слабых','Жаден, но справедлив','Ищет искупления'
-  ];
-
-  const IDEALS = [
-    'Власть принадлежит сильнейшему','Свобода превыше всего','Порядок — основа мира',
-    'Знание — наивысшее благо','Честь важнее жизни','Народ важнее королей'
-  ];
-
-  const BONDS = [
-    'Клянётся отомстить за павших','Служит тайному братству','Ищет древний артефакт',
-    'Защищает родную деревню','Должен огромный долг','Влюблён в недостижимого'
-  ];
-
-  const FLAWS = [
-    'Не может устоять перед золотом','Трусит перед смертью','Завидует успехам других',
-    'Пьёт, когда грустит','Верит любой лжи','Мстит за малейшую обиду'
-  ];
-
-  const BACKSTORIES = [
-    'Выживший из уничтоженной деревни, поклявшийся найти тех, кто стоит за этим злодеянием.',
-    'Бывший наёмник, бросивший ремесло после того, как задание пошло ужасно не так.',
-    'Отпрыск благородного рода, изгнанный после разоблачения тёмного секрета семьи.',
-    'Самоучка, нашедший древние манускрипты в руинах и посвятивший жизнь их изучению.',
-    'Странник без прошлого — или без памяти о нём — ищущий ответы в дальних краях.',
-    'Бывший служитель храма, утративший веру после встречи с тьмой, которую не должен был видеть.',
-    'Уличный воришка, которому однажды помог могущественный маг — и теперь он в долгу.',
-  ];
-
-  function rand(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-  function rollDice(sides) { return Math.floor(Math.random() * sides) + 1; }
-  function roll4d6() {
-    const rolls = [rollDice(6), rollDice(6), rollDice(6), rollDice(6)];
-    return rolls.reduce((a,b) => a+b, 0) - Math.min(...rolls);
-  }
-  function modifier(score) {
-    const m = Math.floor((score - 10) / 2);
-    return m >= 0 ? `+${m}` : `${m}`;
-  }
-
-  function randomName() {
-    const gender = Math.random() > 0.5 ? NAMES_M : NAMES_F;
-    document.getElementById('char-name-input').value = `${rand(gender)} ${rand(SURNAMES)}`;
-  }
-
-  function switchTab(tab) {
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.getElementById('sec-' + tab).classList.add('active');
-    event.target.classList.add('active');
-    if (tab === 'saved') renderSaved();
-  }
-
-  function generateCharacter() {
-    const loading = document.getElementById('loading');
-    loading.classList.add('visible');
-
-    setTimeout(() => {
-      const name = document.getElementById('char-name-input').value.trim() || 
-                   `${rand(Math.random()>0.5?NAMES_M:NAMES_F)} ${rand(SURNAMES)}`;
-      const race = document.getElementById('race-select').value || rand(RACES);
-      const cls = document.getElementById('class-select').value || rand(CLASSES);
-      const alignment = document.getElementById('align-select').value || rand(ALIGNMENTS);
-      const background = document.getElementById('bg-select').value || rand(BACKGROUNDS);
-
-      const stats = {
-        STR: roll4d6(), DEX: roll4d6(), CON: roll4d6(),
-        INT: roll4d6(), WIS: roll4d6(), CHA: roll4d6()
-      };
-
-      const con_mod = Math.floor((stats.CON - 10) / 2);
-      const hp = (CLASS_HP[cls] || 8) + con_mod;
-      const skills = CLASS_SKILLS[cls] || ['Восприятие'];
-      const level = rollDice(5);
-
-      const character = {
-        name, race, cls, alignment, background, stats, hp, skills, level,
-        trait: rand(TRAITS),
-        ideal: rand(IDEALS),
-        bond: rand(BONDS),
-        flaw: rand(FLAWS),
-        backstory: rand(BACKSTORIES),
-        emoji: CLASS_EMOJI[cls] || '⚔️',
-        raceEmoji: RACE_EMOJI[race] || '👤'
-      };
-
-      loading.classList.remove('visible');
-      renderCharacter(character);
-
-      // Show result tab
-      document.getElementById('tab-result').style.display = 'flex';
-      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.getElementById('sec-result').classList.add('active');
-      document.getElementById('tab-result').classList.add('active');
-    }, 1800);
-  }
-
-  function renderCharacter(c, saved = false) {
-    const hpPercent = Math.min(100, Math.max(30, 60 + Math.random() * 40));
-    const statsEntries = Object.entries(c.stats);
-
-    const html = `
-    <div class="result-panel">
-      <div class="char-card">
-        <div class="char-avatar">
-          <div class="char-avatar-frame">${c.emoji}</div>
-        </div>
-        <div class="char-name">${c.name}</div>
-        <div class="char-subtitle">${c.race} · ${c.cls} · ${c.level} уровень</div>
-
-        <div class="char-divider"><span>✦</span></div>
-
-        <div class="trait-grid">
-          <div class="trait-item">
-            <div class="trait-label">Мировоззрение</div>
-            <div class="trait-value">${c.alignment}</div>
-          </div>
-          <div class="trait-item">
-            <div class="trait-label">Предыстория</div>
-            <div class="trait-value">${c.background}</div>
-          </div>
-          <div class="trait-item">
-            <div class="trait-label">Черта</div>
-            <div class="trait-value">${c.trait}</div>
-          </div>
-          <div class="trait-item">
-            <div class="trait-label">Идеал</div>
-            <div class="trait-value">${c.ideal}</div>
-          </div>
-        </div>
-
-        <div class="char-divider"><span>⚔</span></div>
-
-        <div class="stats-grid">
-          ${statsEntries.map(([name, val]) => `
-            <div class="stat-box">
-              <div class="stat-name">${name}</div>
-              <div class="stat-value">${val}</div>
-              <div class="stat-mod">${modifier(val)}</div>
-            </div>
-          `).join('')}
-        </div>
-
-        <div class="hp-bar-container">
-          <div class="hp-bar-label">
-            <span>ХИТЫ</span>
-            <span>${c.hp} макс.</span>
-          </div>
-          <div class="hp-bar">
-            <div class="hp-bar-fill" style="width:${hpPercent}%"></div>
-          </div>
-        </div>
-
-        <div class="char-divider" style="margin-top:16px"><span>✦</span></div>
-
-        <div>
-          <div class="panel-title">Навыки</div>
-          <div class="skills-list">
-            ${c.skills.map(s => `<span class="skill-tag">${s}</span>`).join('')}
-          </div>
-        </div>
-
-        <div class="char-divider"><span>✦</span></div>
-
-        <div>
-          <div class="panel-title">Связь</div>
-          <div class="backstory-box">${c.bond}</div>
-        </div>
-
-        <div style="margin-top:10px">
-          <div class="panel-title">Предыстория</div>
-          <div class="backstory-box">${c.backstory}</div>
-        </div>
+  doc.innerHTML = `
+    <div class="monster-card">
+      <div style="font-size:10px;font-family:'Cinzel Decorative',serif;color:rgba(231,76,60,0.5);letter-spacing:2px;margin-bottom:6px">${m.desc}</div>
+      <span class="monster-emoji">${m.e}</span>
+      <div class="monster-name">${m.n}</div>
+      <div class="monster-hp-label"><span>ЗДОРОВЬЕ</span><span>${Math.max(0,m.currentHp)} / ${m.hp}</span></div>
+      <div class="monster-hp-bar"><div class="monster-hp-fill" style="width:${mPct}%"></div></div>
+    </div>
+    <div class="hero-combat-hp">
+      <div class="combat-hp-box">
+        <div class="combat-hp-label">ГЕРОЙ</div>
+        <div class="combat-hp-val ${s.heroHp<s.heroMaxHp*0.3?'low':''}">${s.heroHp} / ${s.heroMaxHp}</div>
       </div>
+      <div class="combat-hp-box">
+        <div class="combat-hp-label">ХОД</div>
+        <div class="combat-hp-val">${s.turn+1}</div>
+      </div>
+    </div>
+    <div class="panel" style="padding:10px">
+      <div class="panel-title">Журнал боя</div>
+      <div class="combat-log" id="combat-log">
+        ${s.log.length===0?'<div class="log-entry system">Бой начинается...</div>':s.log.slice(-8).map(l=>`<div class="log-entry ${l.type}">${l.text}</div>`).join('')}
+      </div>
+    </div>
+    <div class="combat-btns">
+      <button class="combat-btn attack" onclick="combatAction('attack')" ${s.over?'disabled':''}>⚔️ Атака</button>
+      <button class="combat-btn special" onclick="combatAction('special')" ${s.over?'disabled':''}>✨ Спецудар</button>
+      <button class="combat-btn flee" onclick="combatAction('flee')" ${s.over?'disabled':''}>🏃 Отступить</button>
+    </div>
+  `;
 
-      ${!saved ? `<button class="btn-save" onclick='saveCharacter(${JSON.stringify(c).replace(/'/g,"&#39;")})'>📜 Сохранить в отряд</button>` : ''}
+  const log = document.getElementById('combat-log');
+  if (log) log.scrollTop = log.scrollHeight;
+}
+
+function combatAction(action) {
+  const s = combatState;
+  if (s.over) return;
+  if (tg) tg.HapticFeedback?.impactOccurred('medium');
+
+  const m = s.monster;
+  const strMod = Math.floor((currentChar.stats.STR-10)/2);
+  const dexMod = Math.floor((currentChar.stats.DEX-10)/2);
+
+  if (action==='flee') {
+    const fleeRoll = roll(20)+dexMod;
+    if (fleeRoll>=10) {
+      s.log.push({type:'system',text:`🏃 ${currentChar.name} спасается бегством! (бросок: ${fleeRoll})`});
+      s.over=true;
+      renderCombat();
+      setTimeout(()=>showCombatResult('flee'),500);
+    } else {
+      s.log.push({type:'system',text:`❌ Побег провалился! (бросок: ${fleeRoll})`});
+      monsterAttack(s, m);
+    }
+    s.turn++;
+    renderCombat();
+    return;
+  }
+
+  // Hero attack
+  const atkRoll = roll(20);
+  let heroLog = '';
+  if (atkRoll===1) {
+    heroLog = `💔 ${currentChar.name} промахивается! (1 — крит. провал)`;
+    s.log.push({type:'crit-log',text:heroLog});
+  } else {
+    let dmg = 0;
+    if (action==='special') {
+      dmg = roll(12)+roll(8)+strMod+2;
+      const isCrit = atkRoll===20;
+      if (isCrit) dmg *= 2;
+      heroLog = `${isCrit?'⭐ КРИТИЧЕСКИЙ ':''} ✨ ${currentChar.name} применяет спецудар! Урон: ${dmg}`;
+      s.log.push({type:'hero',text:heroLog});
+    } else {
+      dmg = roll(8)+strMod;
+      const isCrit = atkRoll===20;
+      if (isCrit) dmg *= 2;
+      heroLog = `${isCrit?'⭐ КРИТ! ':''} ⚔️ ${currentChar.name} атакует! Урон: ${dmg} (бросок: ${atkRoll})`;
+      s.log.push({type:'hero',text:heroLog});
+    }
+    m.currentHp -= dmg;
+  }
+
+  if (m.currentHp<=0) {
+    m.currentHp=0;
+    s.over=true;
+    s.log.push({type:'system',text:`💀 ${m.n} повержен!`});
+    renderCombat();
+    setTimeout(()=>showCombatResult('victory'),600);
+    return;
+  }
+
+  // Monster attacks back
+  monsterAttack(s,m);
+  s.turn++;
+  renderCombat();
+
+  if (s.heroHp<=0) {
+    s.heroHp=0;
+    s.over=true;
+    renderCombat();
+    setTimeout(()=>showCombatResult('defeat'),600);
+  }
+}
+
+function monsterAttack(s,m) {
+  const atkRoll = roll(20);
+  if (atkRoll<=3) {
+    s.log.push({type:'monster',text:`🌀 ${m.n} промахивается мимо!`});
+  } else {
+    const dmg = randInt(m.atk[0],m.atk[1]);
+    s.heroHp = Math.max(0, s.heroHp-dmg);
+    s.log.push({type:'monster',text:`🩸 ${m.n} атакует! Урон: ${dmg}`});
+  }
+}
+
+function showCombatResult(type) {
+  const m = combatState.monster;
+  const xp = m.xp;
+  let html='';
+  if (type==='victory') {
+    html=`<div class="battle-result">
+      <div class="battle-result-icon">🏆</div>
+      <div class="battle-result-title victory">ПОБЕДА!</div>
+      <div class="battle-result-text">${currentChar.name} одолел ${m.n}!</div>
+      <div class="xp-badge">+${xp} XP</div><br>
+      <button class="btn-generate" onclick="resetCombat()" style="font-size:10px;padding:10px;margin-top:12px">⚔️ Новый бой</button>
     </div>`;
-
-    document.getElementById('character-output').innerHTML = html;
-  }
-
-  function saveCharacter(c) {
-    const saved = JSON.parse(localStorage.getItem('dnd_chars') || '[]');
-    c.savedAt = Date.now();
-    saved.unshift(c);
-    if (saved.length > 10) saved.pop();
-    localStorage.setItem('dnd_chars', JSON.stringify(saved));
-
-    const btn = document.querySelector('.btn-save');
-    if (btn) {
-      btn.textContent = '✅ Сохранено!';
-      btn.style.color = '#4CAF50';
-      setTimeout(() => {
-        btn.textContent = '📜 Сохранить в отряд';
-        btn.style.color = '';
-      }, 2000);
-    }
-
     if (tg) tg.HapticFeedback?.notificationOccurred('success');
+  } else if (type==='defeat') {
+    html=`<div class="battle-result">
+      <div class="battle-result-icon">💀</div>
+      <div class="battle-result-title defeat">ГЕРОЙ ПАЛ</div>
+      <div class="battle-result-text">${currentChar.name} был сражён ${m.n}...</div>
+      <button class="btn-generate" onclick="resetCombat()" style="font-size:10px;padding:10px;margin-top:12px;border-color:#8b1a1a;color:#e74c3c">🔄 Попробовать снова</button>
+    </div>`;
+    if (tg) tg.HapticFeedback?.notificationOccurred('error');
+  } else {
+    resetCombat(); return;
   }
+  document.getElementById('combat-content').innerHTML = `<div class="panel">${html}</div>`;
+}
 
-  function renderSaved() {
-    const saved = JSON.parse(localStorage.getItem('dnd_chars') || '[]');
-    const container = document.getElementById('saved-list');
+function resetCombat() {
+  combatState=null;
+  document.getElementById('combat-content').innerHTML=`
+    <div class="panel">
+      <div class="panel-title">Выбери противника</div>
+      <div class="monster-select-grid" id="monster-select"></div>
+    </div>`;
+  renderMonsterSelect();
+}
 
-    if (saved.length === 0) {
-      container.innerHTML = `
-        <div class="empty-state">
-          <div class="empty-state-icon">🏰</div>
-          Отряд пуст.<br>Создай своего первого героя!
-        </div>`;
-      return;
-    }
-
-    container.innerHTML = saved.map((c, i) => `
-      <div class="saved-char" onclick="viewSaved(${i})">
-        <div class="saved-char-emoji">${c.emoji}</div>
-        <div class="saved-char-info">
-          <div class="saved-char-name">${c.name}</div>
-          <div class="saved-char-sub">${c.race} ${c.cls} · ${c.level} ур.</div>
-        </div>
-        <span style="color:var(--gold-dark)">›</span>
+// ── SAVED ─────────────────────────────────────────────
+function renderSaved() {
+  const saved = JSON.parse(localStorage.getItem('dnd_chars')||'[]');
+  const el = document.getElementById('saved-list');
+  if (saved.length===0) {
+    el.innerHTML=`<div class="empty-state"><div class="empty-state-icon">🏰</div>Отряд пуст.<br>Создай первого героя!</div>`;
+    return;
+  }
+  el.innerHTML=saved.map((c,i)=>`
+    <div class="saved-char" onclick="viewSaved(${i})">
+      <div class="saved-char-emoji">${c.emoji}</div>
+      <div class="saved-char-info">
+        <div class="saved-char-name">${c.name}</div>
+        <div class="saved-char-sub">${c.race} ${c.cls} · ${c.level} ур.</div>
       </div>
-    `).join('');
-  }
+      <span style="color:var(--gold-dark)">›</span>
+    </div>`).join('');
+}
 
-  function viewSaved(i) {
-    const saved = JSON.parse(localStorage.getItem('dnd_chars') || '[]');
-    const c = saved[i];
+function viewSaved(i) {
+  const saved = JSON.parse(localStorage.getItem('dnd_chars')||'[]');
+  const c = saved[i];
+  document.getElementById('nav-char').style.display='flex';
+  switchTab('char', document.getElementById('nav-char'));
+  renderCharacter(c, true);
+}
 
-    document.getElementById('tab-result').style.display = 'flex';
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.getElementById('sec-result').classList.add('active');
-    document.getElementById('tab-result').classList.add('active');
-
-    renderCharacter(c, true);
-  }
+// Init
+selectDice(20, document.querySelectorAll('.dice-btn')[5]);
 </script>
 </body>
 </html>
