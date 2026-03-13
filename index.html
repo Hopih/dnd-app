@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>D&D Character Generator</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #c9a227;
+    --gold-light: #f0c040;
+    --gold-dark: #8b6914;
+    --parchment: #f5e6c8;
+    --parchment-dark: #e8d5a3;
+    --ink: #1a0f00;
+    --blood: #8b1a1a;
+    --shadow: #0a0500;
+    --bg: #0d0804;
+    --panel: #1a1008;
+    --border: #3d2a0a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Crimson Text', Georgia, serif;
+    background: var(--bg);
+    color: var(--parchment);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 20%, rgba(201,162,39,0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(139,26,26,0.08) 0%, transparent 50%),
+      url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c9a227' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 20px 16px 40px;
+  }
+
+  /* HEADER */
+  .header {
+    text-align: center;
+    margin-bottom: 28px;
+    position: relative;
+  }
+
+  .header-ornament {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .ornament-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  .ornament-diamond {
+    width: 8px; height: 8px;
+    background: var(--gold);
+    transform: rotate(45deg);
+    flex-shrink: 0;
+  }
+
+  .header h1 {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--gold-light);
+    text-shadow: 0 0 20px rgba(201,162,39,0.5), 0 2px 4px rgba(0,0,0,0.8);
+    letter-spacing: 2px;
+    line-height: 1.3;
+  }
+
+  .header-sub {
+    font-family: 'Crimson Text', serif;
+    font-style: italic;
+    color: rgba(245,230,200,0.5);
+    font-size: 13px;
+    margin-top: 4px;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 0;
+    background: var(--shadow);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+
+  .tab {
+    flex: 1;
+    padding: 10px 8px;
+    text-align: center;
+    cursor: pointer;
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 10px;
+    color: rgba(245,230,200,0.4);
+    border: none;
+    background: none;
+    transition: all 0.3s;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    position: relative;
+  }
+
+  .tab.active {
+    background: rgba(201,162,39,0.12);
+    color: var(--gold-light);
+  }
+
+  .tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--gold);
+  }
+
+  /* PANEL */
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold-dark), var(--gold), var(--gold-dark), transparent);
+  }
+
+  .panel-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 11px;
+    color: var(--gold);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .panel-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border), transparent);
+  }
+
+  /* FORM ELEMENTS */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .form-group.full { grid-column: 1 / -1; }
+
+  label {
+    font-size: 11px;
+    color: rgba(245,230,200,0.5);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-family: 'Cinzel Decorative', serif;
+  }
+
+  input[type="text"], select {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--parchment);
+    font-family: 'Crimson Text', serif;
+    font-size: 15px;
+    padding: 8px 10px;
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+    width: 100%;
+  }
+
+  input[type="text"]:focus, select:focus {
+    border-color: var(--gold-dark);
+  }
+
+  select option { background: #1a1008; }
+
+  /* RANDOM BUTTON */
+  .btn-random {
+    width: 100%;
+    padding: 12px;
+    background: none;
+    border: 1px dashed var(--border);
+    border-radius: 4px;
+    color: rgba(245,230,200,0.4);
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 10px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 4px;
+  }
+
+  .btn-random:hover {
+    border-color: var(--gold-dark);
+    color: var(--gold);
+  }
+
+  /* DICE ICON */
+  .dice-icon { font-size: 16px; }
+
+  /* GENERATE BUTTON */
+  .btn-generate {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #2a1a00, #4a2e00);
+    border: 1px solid var(--gold-dark);
+    border-radius: 4px;
+    color: var(--gold-light);
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 13px;
+    letter-spacing: 3px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+
+  .btn-generate::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 30%, rgba(201,162,39,0.15) 50%, transparent 70%);
+    transform: translateX(-100%);
+    transition: transform 0.6s;
+  }
+
+  .btn-generate:hover { border-color: var(--gold); }
+  .btn-generate:hover::before { transform: translateX(100%); }
+  .btn-generate:active { transform: scale(0.98); }
+
+  /* STATS */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .stat-box {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 8px;
+    text-align: center;
+    position: relative;
+  }
+
+  .stat-name {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 8px;
+    color: rgba(245,230,200,0.4);
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+
+  .stat-value {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 22px;
+    color: var(--gold-light);
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .stat-mod {
+    font-size: 12px;
+    color: rgba(245,230,200,0.5);
+    margin-top: 2px;
+  }
+
+  /* CHARACTER CARD */
+  .char-card {
+    background: linear-gradient(135deg, #1a1008 0%, #0d0804 100%);
+    border: 1px solid var(--gold-dark);
+    border-radius: 6px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .char-card::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(ellipse at center, rgba(201,162,39,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .char-avatar {
+    width: 80px; height: 80px;
+    margin: 0 auto 16px;
+    position: relative;
+  }
+
+  .char-avatar-frame {
+    width: 80px; height: 80px;
+    border: 2px solid var(--gold-dark);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.6);
+    font-size: 36px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .char-avatar::before, .char-avatar::after {
+    content: '✦';
+    position: absolute;
+    color: var(--gold-dark);
+    font-size: 10px;
+    top: 50%; transform: translateY(-50%);
+  }
+
+  .char-avatar::before { left: -14px; }
+  .char-avatar::after { right: -14px; }
+
+  .char-name {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 18px;
+    color: var(--gold-light);
+    text-align: center;
+    margin-bottom: 4px;
+    text-shadow: 0 0 20px rgba(201,162,39,0.3);
+  }
+
+  .char-subtitle {
+    text-align: center;
+    font-style: italic;
+    color: rgba(245,230,200,0.5);
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+
+  .char-divider {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 16px 0;
+  }
+
+  .char-divider span {
+    color: var(--gold-dark);
+    font-size: 10px;
+    flex-shrink: 0;
+  }
+
+  .char-divider::before, .char-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .trait-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .trait-item {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 8px 10px;
+  }
+
+  .trait-label {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 8px;
+    color: var(--gold-dark);
+    letter-spacing: 1px;
+    margin-bottom: 3px;
+  }
+
+  .trait-value {
+    font-size: 14px;
+    color: var(--parchment);
+  }
+
+  .backstory-box {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--border);
+    border-left: 2px solid var(--gold-dark);
+    border-radius: 3px;
+    padding: 12px;
+    font-style: italic;
+    font-size: 13px;
+    line-height: 1.6;
+    color: rgba(245,230,200,0.75);
+  }
+
+  .hp-bar-container {
+    margin-top: 14px;
+  }
+
+  .hp-bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 9px;
+    color: var(--gold-dark);
+    margin-bottom: 4px;
+    letter-spacing: 1px;
+  }
+
+  .hp-bar {
+    height: 6px;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .hp-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--blood), #c0392b);
+    border-radius: 2px;
+    transition: width 1s ease;
+  }
+
+  /* SKILLS LIST */
+  .skills-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .skill-tag {
+    background: rgba(201,162,39,0.1);
+    border: 1px solid rgba(201,162,39,0.25);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 12px;
+    color: rgba(245,230,200,0.7);
+  }
+
+  /* LOADING */
+  .loading-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(13,8,4,0.9);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .loading-overlay.visible { display: flex; }
+
+  .loading-dice {
+    font-size: 48px;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .loading-text {
+    font-family: 'Cinzel Decorative', serif;
+    color: var(--gold);
+    font-size: 12px;
+    letter-spacing: 3px;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+
+  /* SECTION HIDDEN */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* SAVE BUTTON */
+  .btn-save {
+    width: 100%;
+    padding: 12px;
+    background: rgba(201,162,39,0.1);
+    border: 1px solid var(--gold-dark);
+    border-radius: 4px;
+    color: var(--gold);
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 10px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    margin-top: 12px;
+    transition: all 0.3s;
+  }
+
+  .btn-save:hover { background: rgba(201,162,39,0.2); }
+
+  /* SAVED LIST */
+  .saved-char {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+
+  .saved-char:hover { border-color: var(--gold-dark); }
+
+  .saved-char-emoji { font-size: 24px; }
+
+  .saved-char-info { flex: 1; }
+
+  .saved-char-name {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 12px;
+    color: var(--gold-light);
+    margin-bottom: 2px;
+  }
+
+  .saved-char-sub { font-size: 12px; color: rgba(245,230,200,0.4); font-style: italic; }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: rgba(245,230,200,0.25);
+    font-style: italic;
+  }
+
+  .empty-state-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.3; }
+
+  /* RESULT appears with animation */
+  .result-panel {
+    animation: fadeInUp 0.5s ease;
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--shadow); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loading">
+  <div class="loading-dice">🎲</div>
+  <div class="loading-text">СУДЬБА РЕШАЕТСЯ...</div>
+</div>
+
+<div class="container">
+  <div class="header">
+    <div class="header-ornament">
+      <div class="ornament-line"></div>
+      <div class="ornament-diamond"></div>
+      <div class="ornament-line"></div>
+    </div>
+    <h1>СОЗДАТЕЛЬ<br>ГЕРОЕВ</h1>
+    <div class="header-sub">Dungeons & Dragons · 5th Edition</div>
+    <div class="header-ornament" style="margin-top:8px">
+      <div class="ornament-line"></div>
+      <div class="ornament-diamond"></div>
+      <div class="ornament-line"></div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('create')">⚔️ Создать</button>
+    <button class="tab" onclick="switchTab('result')" id="tab-result" style="display:none">📜 Персонаж</button>
+    <button class="tab" onclick="switchTab('saved')">🏆 Отряд</button>
+  </div>
+
+  <!-- CREATE SECTION -->
+  <div class="section active" id="sec-create">
+    <div class="panel">
+      <div class="panel-title">Имя героя</div>
+      <div class="form-group">
+        <input type="text" id="char-name-input" placeholder="Введи имя или оставь пустым...">
+      </div>
+      <button class="btn-random" onclick="randomName()">🎲 Случайное имя</button>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Происхождение</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Раса</label>
+          <select id="race-select">
+            <option value="">🎲 Случайно</option>
+            <option value="Человек">Человек</option>
+            <option value="Эльф">Эльф</option>
+            <option value="Дварф">Дварф</option>
+            <option value="Полурослик">Полурослик</option>
+            <option value="Гном">Гном</option>
+            <option value="Полуэльф">Полуэльф</option>
+            <option value="Полуорк">Полуорк</option>
+            <option value="Тифлинг">Тифлинг</option>
+            <option value="Дракорождённый">Дракорождённый</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Класс</label>
+          <select id="class-select">
+            <option value="">🎲 Случайно</option>
+            <option value="Варвар">Варвар</option>
+            <option value="Бард">Бард</option>
+            <option value="Жрец">Жрец</option>
+            <option value="Друид">Друид</option>
+            <option value="Воин">Воин</option>
+            <option value="Монах">Монах</option>
+            <option value="Паладин">Паладин</option>
+            <option value="Следопыт">Следопыт</option>
+            <option value="Плут">Плут</option>
+            <option value="Колдун">Колдун</option>
+            <option value="Волшебник">Волшебник</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Мировоззрение</label>
+          <select id="align-select">
+            <option value="">🎲 Случайно</option>
+            <option value="Законопослушный добрый">Законопослушный добрый</option>
+            <option value="Нейтральный добрый">Нейтральный добрый</option>
+            <option value="Хаотичный добрый">Хаотичный добрый</option>
+            <option value="Законопослушный нейтральный">Законопослушный нейт.</option>
+            <option value="Истинно нейтральный">Истинно нейтральный</option>
+            <option value="Хаотичный нейтральный">Хаотичный нейтральный</option>
+            <option value="Законопослушный злой">Законопослушный злой</option>
+            <option value="Нейтральный злой">Нейтральный злой</option>
+            <option value="Хаотичный злой">Хаотичный злой</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Предыстория</label>
+          <select id="bg-select">
+            <option value="">🎲 Случайно</option>
+            <option value="Аколит">Аколит</option>
+            <option value="Преступник">Преступник</option>
+            <option value="Народный герой">Народный герой</option>
+            <option value="Благородный">Благородный</option>
+            <option value="Мудрец">Мудрец</option>
+            <option value="Солдат">Солдат</option>
+            <option value="Моряк">Моряк</option>
+            <option value="Отшельник">Отшельник</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-generate" onclick="generateCharacter()">
+      ⚔️ &nbsp; ПРИЗВАТЬ ГЕРОЯ &nbsp; ⚔️
+    </button>
+  </div>
+
+  <!-- RESULT SECTION -->
+  <div class="section" id="sec-result">
+    <div id="character-output"></div>
+  </div>
+
+  <!-- SAVED SECTION -->
+  <div class="section" id="sec-saved">
+    <div id="saved-list"></div>
+  </div>
+</div>
+
+<script>
+  // Init Telegram WebApp
+  const tg = window.Telegram?.WebApp;
+  if (tg) {
+    tg.ready();
+    tg.expand();
+  }
+
+  // Data
+  const RACES = ['Человек','Эльф','Дварф','Полурослик','Гном','Полуэльф','Полуорк','Тифлинг','Дракорождённый'];
+  const CLASSES = ['Варвар','Бард','Жрец','Друид','Воин','Монах','Паладин','Следопыт','Плут','Колдун','Волшебник'];
+  const ALIGNMENTS = ['Законопослушный добрый','Нейтральный добрый','Хаотичный добрый','Законопослушный нейтральный','Истинно нейтральный','Хаотичный нейтральный','Законопослушный злой','Нейтральный злой','Хаотичный злой'];
+  const BACKGROUNDS = ['Аколит','Преступник','Народный герой','Благородный','Мудрец','Солдат','Моряк','Отшельник'];
+
+  const NAMES_M = ['Аланор','Брандир','Каэль','Дорин','Элдан','Фаррин','Горум','Хаэст','Ирvel','Джорен','Кэйн','Ладас','Морвен','Нассир','Орим','Парис','Куэнтин','Рорик','Стерн','Тарос','Умбер','Вэйн','Волкар','Ксен','Ярик'];
+  const NAMES_F = ['Аэра','Белара','Сирра','Дайна','Элара','Фенна','Гвен','Хэйра','Иссол','Яира','Кэйра','Лира','Мира','Нова','Ора','Пэйра','Квина','Рэйна','Соларис','Тала','Урса','Вэйла','Вэйра','Ксора','Зора'];
+  const SURNAMES = ['Дубовый','Железный','Тёмный','Серебряный','Золотой','Огненный','Ледяной','Буревой','Теневой','Кровавый','Звёздный','Лунный'];
+
+  const CLASS_EMOJI = {
+    'Варвар':'⚔️','Бард':'🎸','Жрец':'✝️','Друид':'🌿','Воин':'🛡️',
+    'Монах':'👊','Паладин':'⚡','Следопыт':'🏹','Плут':'🗡️','Колдун':'💀','Волшебник':'🔮'
+  };
+
+  const RACE_EMOJI = {
+    'Человек':'👤','Эльф':'🧝','Дварф':'⛏️','Полурослик':'🦶','Гном':'🔧',
+    'Полуэльф':'🌗','Полуорк':'🪨','Тифлинг':'😈','Дракорождённый':'🐉'
+  };
+
+  const CLASS_HP = {
+    'Варвар':12,'Жрец':8,'Друид':8,'Воин':10,'Монах':8,
+    'Паладин':10,'Следопыт':10,'Плут':8,'Колдун':8,'Волшебник':6,'Бард':8
+  };
+
+  const CLASS_SKILLS = {
+    'Варвар':['Атлетика','Выживание','Животновод.','Восприятие'],
+    'Бард':['Выступление','Убеждение','Обман','История'],
+    'Жрец':['История','Медицина','Убеждение','Религия'],
+    'Друид':['Природа','Восприятие','Выживание','Медицина'],
+    'Воин':['Атлетика','Запугивание','Восприятие','История'],
+    'Монах':['Акробатика','Атлетика','Скрытность','Религия'],
+    'Паладин':['Атлетика','Убеждение','Медицина','Религия'],
+    'Следопыт':['Выживание','Восприятие','Природа','Скрытность'],
+    'Плут':['Акробатика','Обман','Скрытность','Восприятие'],
+    'Колдун':['Обман','История','Запугивание','Магия'],
+    'Волшебник':['История','Магия','Расследование','Природа']
+  };
+
+  const TRAITS = [
+    'Прямолинеен до грубости','Хранит мрачные тайны','Смеётся в лицо смерти',
+    'Никогда не нарушает клятв','Коллекционирует чужие секреты','Говорит загадками',
+    'Не доверяет магии','Верит в знамения','Видит красоту в разрушении',
+    'Защищает слабых','Жаден, но справедлив','Ищет искупления'
+  ];
+
+  const IDEALS = [
+    'Власть принадлежит сильнейшему','Свобода превыше всего','Порядок — основа мира',
+    'Знание — наивысшее благо','Честь важнее жизни','Народ важнее королей'
+  ];
+
+  const BONDS = [
+    'Клянётся отомстить за павших','Служит тайному братству','Ищет древний артефакт',
+    'Защищает родную деревню','Должен огромный долг','Влюблён в недостижимого'
+  ];
+
+  const FLAWS = [
+    'Не может устоять перед золотом','Трусит перед смертью','Завидует успехам других',
+    'Пьёт, когда грустит','Верит любой лжи','Мстит за малейшую обиду'
+  ];
+
+  const BACKSTORIES = [
+    'Выживший из уничтоженной деревни, поклявшийся найти тех, кто стоит за этим злодеянием.',
+    'Бывший наёмник, бросивший ремесло после того, как задание пошло ужасно не так.',
+    'Отпрыск благородного рода, изгнанный после разоблачения тёмного секрета семьи.',
+    'Самоучка, нашедший древние манускрипты в руинах и посвятивший жизнь их изучению.',
+    'Странник без прошлого — или без памяти о нём — ищущий ответы в дальних краях.',
+    'Бывший служитель храма, утративший веру после встречи с тьмой, которую не должен был видеть.',
+    'Уличный воришка, которому однажды помог могущественный маг — и теперь он в долгу.',
+  ];
+
+  function rand(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+  function rollDice(sides) { return Math.floor(Math.random() * sides) + 1; }
+  function roll4d6() {
+    const rolls = [rollDice(6), rollDice(6), rollDice(6), rollDice(6)];
+    return rolls.reduce((a,b) => a+b, 0) - Math.min(...rolls);
+  }
+  function modifier(score) {
+    const m = Math.floor((score - 10) / 2);
+    return m >= 0 ? `+${m}` : `${m}`;
+  }
+
+  function randomName() {
+    const gender = Math.random() > 0.5 ? NAMES_M : NAMES_F;
+    document.getElementById('char-name-input').value = `${rand(gender)} ${rand(SURNAMES)}`;
+  }
+
+  function switchTab(tab) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('sec-' + tab).classList.add('active');
+    event.target.classList.add('active');
+    if (tab === 'saved') renderSaved();
+  }
+
+  function generateCharacter() {
+    const loading = document.getElementById('loading');
+    loading.classList.add('visible');
+
+    setTimeout(() => {
+      const name = document.getElementById('char-name-input').value.trim() || 
+                   `${rand(Math.random()>0.5?NAMES_M:NAMES_F)} ${rand(SURNAMES)}`;
+      const race = document.getElementById('race-select').value || rand(RACES);
+      const cls = document.getElementById('class-select').value || rand(CLASSES);
+      const alignment = document.getElementById('align-select').value || rand(ALIGNMENTS);
+      const background = document.getElementById('bg-select').value || rand(BACKGROUNDS);
+
+      const stats = {
+        STR: roll4d6(), DEX: roll4d6(), CON: roll4d6(),
+        INT: roll4d6(), WIS: roll4d6(), CHA: roll4d6()
+      };
+
+      const con_mod = Math.floor((stats.CON - 10) / 2);
+      const hp = (CLASS_HP[cls] || 8) + con_mod;
+      const skills = CLASS_SKILLS[cls] || ['Восприятие'];
+      const level = rollDice(5);
+
+      const character = {
+        name, race, cls, alignment, background, stats, hp, skills, level,
+        trait: rand(TRAITS),
+        ideal: rand(IDEALS),
+        bond: rand(BONDS),
+        flaw: rand(FLAWS),
+        backstory: rand(BACKSTORIES),
+        emoji: CLASS_EMOJI[cls] || '⚔️',
+        raceEmoji: RACE_EMOJI[race] || '👤'
+      };
+
+      loading.classList.remove('visible');
+      renderCharacter(character);
+
+      // Show result tab
+      document.getElementById('tab-result').style.display = 'flex';
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById('sec-result').classList.add('active');
+      document.getElementById('tab-result').classList.add('active');
+    }, 1800);
+  }
+
+  function renderCharacter(c, saved = false) {
+    const hpPercent = Math.min(100, Math.max(30, 60 + Math.random() * 40));
+    const statsEntries = Object.entries(c.stats);
+
+    const html = `
+    <div class="result-panel">
+      <div class="char-card">
+        <div class="char-avatar">
+          <div class="char-avatar-frame">${c.emoji}</div>
+        </div>
+        <div class="char-name">${c.name}</div>
+        <div class="char-subtitle">${c.race} · ${c.cls} · ${c.level} уровень</div>
+
+        <div class="char-divider"><span>✦</span></div>
+
+        <div class="trait-grid">
+          <div class="trait-item">
+            <div class="trait-label">Мировоззрение</div>
+            <div class="trait-value">${c.alignment}</div>
+          </div>
+          <div class="trait-item">
+            <div class="trait-label">Предыстория</div>
+            <div class="trait-value">${c.background}</div>
+          </div>
+          <div class="trait-item">
+            <div class="trait-label">Черта</div>
+            <div class="trait-value">${c.trait}</div>
+          </div>
+          <div class="trait-item">
+            <div class="trait-label">Идеал</div>
+            <div class="trait-value">${c.ideal}</div>
+          </div>
+        </div>
+
+        <div class="char-divider"><span>⚔</span></div>
+
+        <div class="stats-grid">
+          ${statsEntries.map(([name, val]) => `
+            <div class="stat-box">
+              <div class="stat-name">${name}</div>
+              <div class="stat-value">${val}</div>
+              <div class="stat-mod">${modifier(val)}</div>
+            </div>
+          `).join('')}
+        </div>
+
+        <div class="hp-bar-container">
+          <div class="hp-bar-label">
+            <span>ХИТЫ</span>
+            <span>${c.hp} макс.</span>
+          </div>
+          <div class="hp-bar">
+            <div class="hp-bar-fill" style="width:${hpPercent}%"></div>
+          </div>
+        </div>
+
+        <div class="char-divider" style="margin-top:16px"><span>✦</span></div>
+
+        <div>
+          <div class="panel-title">Навыки</div>
+          <div class="skills-list">
+            ${c.skills.map(s => `<span class="skill-tag">${s}</span>`).join('')}
+          </div>
+        </div>
+
+        <div class="char-divider"><span>✦</span></div>
+
+        <div>
+          <div class="panel-title">Связь</div>
+          <div class="backstory-box">${c.bond}</div>
+        </div>
+
+        <div style="margin-top:10px">
+          <div class="panel-title">Предыстория</div>
+          <div class="backstory-box">${c.backstory}</div>
+        </div>
+      </div>
+
+      ${!saved ? `<button class="btn-save" onclick='saveCharacter(${JSON.stringify(c).replace(/'/g,"&#39;")})'>📜 Сохранить в отряд</button>` : ''}
+    </div>`;
+
+    document.getElementById('character-output').innerHTML = html;
+  }
+
+  function saveCharacter(c) {
+    const saved = JSON.parse(localStorage.getItem('dnd_chars') || '[]');
+    c.savedAt = Date.now();
+    saved.unshift(c);
+    if (saved.length > 10) saved.pop();
+    localStorage.setItem('dnd_chars', JSON.stringify(saved));
+
+    const btn = document.querySelector('.btn-save');
+    if (btn) {
+      btn.textContent = '✅ Сохранено!';
+      btn.style.color = '#4CAF50';
+      setTimeout(() => {
+        btn.textContent = '📜 Сохранить в отряд';
+        btn.style.color = '';
+      }, 2000);
+    }
+
+    if (tg) tg.HapticFeedback?.notificationOccurred('success');
+  }
+
+  function renderSaved() {
+    const saved = JSON.parse(localStorage.getItem('dnd_chars') || '[]');
+    const container = document.getElementById('saved-list');
+
+    if (saved.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">🏰</div>
+          Отряд пуст.<br>Создай своего первого героя!
+        </div>`;
+      return;
+    }
+
+    container.innerHTML = saved.map((c, i) => `
+      <div class="saved-char" onclick="viewSaved(${i})">
+        <div class="saved-char-emoji">${c.emoji}</div>
+        <div class="saved-char-info">
+          <div class="saved-char-name">${c.name}</div>
+          <div class="saved-char-sub">${c.race} ${c.cls} · ${c.level} ур.</div>
+        </div>
+        <span style="color:var(--gold-dark)">›</span>
+      </div>
+    `).join('');
+  }
+
+  function viewSaved(i) {
+    const saved = JSON.parse(localStorage.getItem('dnd_chars') || '[]');
+    const c = saved[i];
+
+    document.getElementById('tab-result').style.display = 'flex';
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('sec-result').classList.add('active');
+    document.getElementById('tab-result').classList.add('active');
+
+    renderCharacter(c, true);
+  }
+</script>
+</body>
+</html>
